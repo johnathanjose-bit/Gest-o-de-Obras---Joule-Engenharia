@@ -1,0 +1,3244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Gestão de Obras - Joule Engenharia</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+  body{background:#f0f2f5;color:#1a1a2e}
+  header{background:#0f3460;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  header h1{font-size:20px}
+  header .sub{font-size:12px;opacity:.85}
+  .topo-fixo{position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  nav{background:#16213e;display:flex;flex-wrap:wrap;gap:4px;padding:8px 24px}
+  nav button{background:transparent;border:none;color:#cfd8e3;padding:10px 16px;cursor:pointer;font-size:14px;border-radius:6px}
+  nav button:hover{background:#1a2a4a}
+  nav button.active{background:#e94560;color:#fff;font-weight:600}
+  main{padding:28px 24px 24px;max-width:1500px;margin:0 auto}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+  .card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .card .label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+  .card .value{font-size:26px;font-weight:700;margin-top:6px}
+  .card .value.green{color:#16a34a}.card .value.red{color:#dc2626}.card .value.orange{color:#ea580c}.card .value.blue{color:#0f3460}
+  .panel{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:24px}
+  .panel h2{font-size:17px;margin-bottom:16px;color:#0f3460}
+  .filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+  .filters select,.filters input{padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#0f3460;color:#fff;text-align:left;padding:10px 12px}
+  td{padding:9px 12px;border-bottom:1px solid #e5e7eb}
+  tr:hover td{background:#f8fafc}
+  .badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+  .badge.ok{background:#dcfce7;color:#166534}
+  .badge.warn{background:#fef3c7;color:#92400e}
+  .badge.crit{background:#fee2e2;color:#991b1b}
+  .badge.info{background:#e0e7ff;color:#3730a3}
+  .badge.neutral{background:#e5e7eb;color:#374151}
+  .badge.roxo{background:#f3e8ff;color:#6b21a8}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+  .form-grid label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px}
+  .form-grid input,.form-grid select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px}
+  .btn{background:#0f3460;color:#fff;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}
+  .btn:hover{background:#16213e}
+  .btn.danger{background:#dc2626}.btn.danger:hover{background:#b91c1c}
+  .btn.small{padding:5px 10px;font-size:12px}
+  .btn.green{background:#16a34a}.btn.green:hover{background:#15803d}
+  .progress{background:#e5e7eb;border-radius:20px;height:8px;overflow:hidden;min-width:80px}
+  .progress > div{height:100%;border-radius:20px}
+  .hidden{display:none}
+  .toast{position:fixed;bottom:20px;right:20px;background:#0f3460;color:#fff;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;transition:opacity .3s;z-index:999}
+  .toast.show{opacity:1}
+  .actions-cell{display:flex;gap:6px;flex-wrap:wrap}
+  .eng-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+  .eng-card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:4px solid #0f3460}
+  .eng-card h3{font-size:16px;color:#0f3460;margin-bottom:4px}
+  .eng-card .eng-total{font-size:13px;color:#6b7280;margin-bottom:12px}
+  .eng-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .eng-obras{list-style:none}
+  .eng-obras li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed #e5e7eb;font-size:13px}
+  .eng-obras li:last-child{border-bottom:none}
+  .mo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+  .mo-item{border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#fafbfc}
+  .mo-item label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px}
+  .mo-item input,.mo-item select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px}
+  .servico-item{border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:12px;background:#f8fafc}
+  .servico-item .sv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .tarefa-item{display:flex;gap:8px;margin-bottom:6px}
+  .tarefa-item input{flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px}
+  .tarefa-item .tf-unid{flex:0 0 180px}
+  .semana-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+  .semana-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #0f3460}
+  .semana-card h4{font-size:15px;color:#0f3460;margin-bottom:6px}
+  .semana-card .membros{font-size:13px;color:#6b7280;margin-bottom:10px}
+  .aloc{font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:6px}
+  .aloc.atual{background:#dcfce7;border:1px solid #86efac}
+  .aloc.proxima{background:#e0e7ff;border:1px solid #a5b4fc}
+  .aloc .obra{font-weight:600}
+  .aloc .periodo{color:#374151;font-size:12px}
+  .ferr-status{font-weight:600}
+  .ferr-status.disponivel{color:#16a34a}
+  .ferr-status.emuso{color:#ea580c}
+  @media(max-width:700px){main{padding:12px}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="topo-fixo">
+<header>
+  <div>
+    <h1>🏗️ Gestão de Obras - Joule Engenharia</h1>
+    <div class="sub">Sistema HVAC | Sistema Ventilação e Exaustão Mecânica | Sistema Exaustão de Cozinha | Sistema SDAI</div>
+  </div>
+  <div>
+    <button class="btn" onclick="exportarDados()">📥 Exportar JSON</button>
+    <button class="btn" onclick="imprimirProgramacaoSemanal()">🖨️ Imprimir Programação</button>
+    <button class="btn danger" onclick="limparDados()">🗑️ Limpar dados</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-tab="visao" onclick="mudarAba('visao')">📊 Visão Geral</button>
+  <button data-tab="obras" onclick="mudarAba('obras')">🏢 Obras</button>
+  <button data-tab="apontamentos" onclick="mudarAba('apontamentos')">📋 Apontamentos</button>
+  <button data-tab="evolucao" onclick="mudarAba('evolucao')">📈 Evolução Física da Obra</button>
+  <button data-tab="equipes" onclick="mudarAba('equipes')">👷 Equipes</button>
+  <button data-tab="colaboradores" onclick="mudarAba('colaboradores')">👷 Colaboradores</button>
+  <button data-tab="engenheiros" onclick="mudarAba('engenheiros')">👷 Engenheiros</button>
+  <button data-tab="redes" onclick="mudarAba('redes')">🔧 Redes Frigorígenas</button>
+  <button data-tab="fabricacao" onclick="mudarAba('fabricacao')">🏭 Painel de Fabricação</button>
+  <button data-tab="empreiteiros" onclick="mudarAba('empreiteiros')">🤝 Empreiteiros</button>
+  <button data-tab="ferramentas" onclick="mudarAba('ferramentas')">🔧 Ferramentas</button>
+</nav>
+</div>
+
+<main>
+  <section id="tab-visao">
+    <div class="cards" id="cardsVisao"></div>
+    <div class="panel">
+      <h2>👷 Engenheiros Responsáveis</h2>
+      <div class="eng-grid" id="gridEngenheiros"></div>
+    </div>
+    <div class="panel">
+      <h2>📈 Curva Planejada x Consumida por Obra</h2>
+      <div class="filters">
+        <select id="filtroStatusVisao" onchange="renderVisao()">
+          <option value="">Todos os status</option>
+          <option>Em andamento</option><option>Concluída</option><option>Atrasada</option>
+          <option>Não iniciada</option><option>Paralisada</option><option>Aguardando equipe</option>
+        </select>
+      </div>
+      <div id="alertaVisao"></div>
+      <div style="overflow-x:auto"><table id="tabelaVisao"></table></div>
+    </div>
+    <div class="panel">
+      <h2>👷 Resumo das Equipes</h2>
+      <div class="semana-grid" id="gridEquipesResumo"></div>
+    </div>
+  </section>
+
+  <section id="tab-obras" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Nova Obra</h2>
+      <div class="form-grid">
+        <div><label>Nome da Obra</label><input id="o_nome" placeholder="Ex: AERO 17"></div>
+        <div><label>Engenheiro Responsável</label><select id="o_eng"></select></div>
+        <div><label>Status</label>
+          <select id="o_status">
+            <option>Em andamento</option><option>Concluída</option><option>Atrasada</option>
+            <option>Não iniciada</option><option>Paralisada</option><option>Aguardando equipe</option>
+          </select>
+        </div>
+        <div><label>Tipo de Obra</label>
+          <select id="o_tipo">
+            <option>Comercial</option><option>Hospitalar</option><option>Indústria</option>
+            <option>Obra Pública</option><option>Outros</option><option>Predial</option>
+            <option>Residencial</option><option>Shopping</option>
+          </select>
+        </div>
+        <div><label>Observações</label><input id="o_obs" placeholder="Observações"></div>
+      </div>
+      <button class="btn small" onclick="cadastrarNovoEngenheiro()">➕ Cadastrar novo engenheiro</button>
+      <h3 style="font-size:14px;color:#0f3460;margin:14px 0 10px">🛠️ Serviços da Obra (verba MO + dias de execução)</h3>
+      <div id="servicosContainer"></div>
+      <button class="btn small" onclick="adicionarServico()">➕ Adicionar serviço</button>
+      <button class="btn small" onclick="cadastrarNovoTipoServico()">➕ Cadastrar novo tipo de serviço</button>
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">💡 Para cada serviço informe a <b>Verba MO (R$)</b> e os <b>Dias de Execução</b>. A taxa diária (R$/dia) é calculada automaticamente. <b>Própria</b> = controlada por apontamentos (dias). <b>Empreiteira</b> = controlada por contratos e medições na aba Empreiteiros. <b>Regra de consumo:</b> a cada 2 pessoas-dia trabalhadas abate 1 dia da obra (1 pessoa = 0,5 dia; 5 pessoas = 2,5 dias).</p>
+      <div style="margin-top:14px"><button class="btn" onclick="salvarObra()">💾 Salvar Obra</button></div>
+    </div>
+    <div class="panel">
+      <h2>🏢 Obras Cadastradas</h2>
+      <div class="filters">
+        <select id="filtroObraStatus" onchange="renderObras()">
+          <option value="">Todos os status</option>
+          <option>Em andamento</option><option>Concluída</option><option>Atrasada</option>
+          <option>Não iniciada</option><option>Paralisada</option><option>Aguardando equipe</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><table id="tabelaObras"></table></div>
+    </div>
+    <div class="panel">
+      <h2>📊 Relatório Final de Mão de Obra Utilizada</h2>
+      <div class="filters">
+        <select id="relObra" onchange="gerarRelatorioMaoDeObra()"><option value="">Todas as obras</option></select>
+        <input type="date" id="relDataInicio" onchange="gerarRelatorioMaoDeObra()">
+        <input type="date" id="relDataFim" onchange="gerarRelatorioMaoDeObra()">
+        <button class="btn small" onclick="imprimirRelatorioMaoDeObra()">🖨️ Imprimir Relatório</button>
+      </div>
+      <div id="relatorioContainer"></div>
+    </div>
+  </section>
+
+  <section id="tab-apontamentos" class="hidden">
+    <div class="panel">
+      <h2>➕ Novo Apontamento Diário</h2>
+      <div class="form-grid">
+        <div><label>Data</label><input id="a_data" type="date"></div>
+        <div><label>Obra</label><select id="a_obra" onchange="preencherServicosApontamento()"></select></div>
+        <div><label>Serviço Realizado</label><select id="a_servico" onchange="preencherTarefasApontamento()"></select></div>
+        <div><label>Tarefa do Serviço</label><select id="a_tarefa"></select></div>
+        <div><label>Observações</label><input id="a_obs" placeholder="Observações"></div>
+      </div>
+      <h3 style="font-size:14px;color:#0f3460;margin:14px 0 10px">👥 Colaboradores do Lançamento</h3>
+      <div class="mo-grid" id="aColaboradoresContainer"></div>
+      <button class="btn small" onclick="adicionarColaboradorApontamento()">➕ Adicionar colaborador</button>
+      <div style="margin-top:14px"><button class="btn" onclick="salvarApontamento()">💾 Salvar Apontamento</button></div>
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">💡 A função é preenchida automaticamente pelo cadastro. Dia padrão: <b>8,75 horas</b>. Na tabela abaixo, <b>Serviço</b> e <b>Tarefa</b> são editáveis diretamente (com as opções da obra do colaborador): ao alterar, a origem muda para <b>Manual</b>. Use os botões <b>Falta</b> e <b>BH</b>; nesses casos o dia <b>não abate</b> do saldo da obra.</p>
+    </div>
+    <div class="panel">
+      <h2>📋 Apontamentos Registrados</h2>
+      <div class="filters">
+        <select id="filtroApObra" onchange="renderApontamentos()"><option value="">Todas as obras</option></select>
+        <select id="filtroApColab" onchange="renderApontamentos()"><option value="">Todos os colaboradores</option></select>
+        <select id="filtroApFuncao" onchange="renderApontamentos()"><option value="">Todas as funções</option></select>
+        <select id="filtroApSituacao" onchange="renderApontamentos()">
+          <option value="">Todas as situações</option>
+          <option>Trabalhado</option>
+          <option>Falta</option>
+          <option>BH</option>
+        </select>
+        <input type="date" id="filtroApData" onchange="renderApontamentos()">
+      </div>
+      <div style="overflow-x:auto"><table id="tabelaApontamentos"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-evolucao" class="hidden">
+    <div class="cards" id="cardsEvolucao"></div>
+    <div class="panel">
+      <h2>📈 Evolução Física da Obra (Planejado x Executado)</h2>
+      <div class="filters">
+        <select id="filtroEvolObra" onchange="renderEvolucao()"><option value="">Todas as obras</option></select>
+      </div>
+      <div id="evolucaoContainer"></div>
+    </div>
+  </section>
+
+  <section id="tab-equipes" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Equipe</h2>
+      <div class="form-grid"><div><label>Nome da Equipe</label><input id="e_nome" placeholder="Ex: Equipe 01"></div></div>
+      <h3 style="font-size:14px;color:#0f3460;margin:14px 0 10px">👥 Colaboradores da Equipe</h3>
+      <div class="mo-grid" id="eMembrosContainer"></div>
+      <button class="btn small" onclick="adicionarMembroEquipe()">➕ Adicionar colaborador</button>
+      <div style="margin-top:14px"><button class="btn" onclick="salvarEquipe()">💾 Salvar Equipe</button></div>
+    </div>
+    <div class="panel">
+      <h2>📅 Programar Alocação de Equipe</h2>
+      <div class="form-grid">
+        <div><label>Equipe</label><select id="p_equipe"></select></div>
+        <div><label>Obra</label><select id="p_obra" onchange="preencherServicosAlocacao()"></select></div>
+        <div><label>Serviço Realizado (opcional)</label><select id="p_servico" onchange="preencherTarefasAlocacao()"></select></div>
+        <div><label>Tarefa do Serviço (opcional)</label><select id="p_tarefa"></select></div>
+        <div><label>Data Início</label><input id="p_inicio" type="date"></div>
+        <div><label>Data Fim</label><input id="p_fim" type="date"></div>
+        <div><label>Observações</label><input id="p_obs" placeholder="Observações"></div>
+      </div>
+      <button class="btn" onclick="salvarAlocacao()">💾 Salvar Alocação</button>
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">⚠️ Se a equipe já estiver alocada em outra obra no mesmo período, um alerta será exibido. A alocação gera apontamentos automáticos (segunda a sexta) já com o serviço e a tarefa escolhidos. Esses lançamentos <b>abatem os dias da obra</b> (2 pessoas-dia = 1 dia) apenas quando o dia chega. Deixe o serviço em branco se preferir.</p>
+    </div>
+    <div class="panel">
+      <h2>🗓️ Programação Semanal (semana atual + 2 semanas)</h2>
+      <div class="filters">
+        <select id="filtroSemana" onchange="renderEquipes()"></select>
+        <button class="btn small" onclick="copiarProgramacaoWhatsApp()">📋 Copiar p/ WhatsApp</button>
+        <button class="btn small green" onclick="gerarImagemProgramacao()">🖼️ Gerar Imagem</button>
+      </div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:10px">💡 Clique em <b>Copiar</b> e cole no grupo do WhatsApp, ou em <b>Gerar Imagem</b> para baixar o PNG da programação da semana selecionada. Use o botão <b>✅</b> para marcar uma obra concluída: ela sai da programação e o histórico fica preservado.</p>
+      <div class="semana-grid" id="gridEquipes"></div>
+    </div>
+  </section>
+
+  <section id="tab-colaboradores" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Colaborador</h2>
+      <div class="form-grid">
+        <div><label>Nome</label><input id="c_nome" placeholder="Nome do colaborador"></div>
+        <div><label>Função</label><select id="c_funcao"></select></div>
+      </div>
+      <button class="btn" onclick="salvarColaborador()">💾 Salvar Colaborador</button>
+    </div>
+    <div class="panel">
+      <h2>👥 Colaboradores Cadastrados</h2>
+      <div style="overflow-x:auto"><table id="tabelaColaboradores"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-engenheiros" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Engenheiro</h2>
+      <div class="form-grid"><div><label>Nome do Engenheiro</label><input id="eng_nome" placeholder="Nome do engenheiro"></div></div>
+      <button class="btn" onclick="salvarEngenheiro()">💾 Salvar Engenheiro</button>
+    </div>
+    <div class="panel">
+      <h2>👷 Engenheiros Cadastrados</h2>
+      <div style="overflow-x:auto"><table id="tabelaEngenheiros"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-redes" class="hidden">
+    <div class="panel">
+      <h2>🔧 Fabricação de Redes Frigorígenas</h2>
+      <div class="filters"><select id="redObra" onchange="carregarRedesObra()"></select></div>
+      <div class="cards" id="cardsRedes"></div>
+    </div>
+    <div class="panel">
+      <h2>📊 Relatório de Pavimentos</h2>
+      <div class="filters">
+        <select id="filtroPavStatus" onchange="renderRelatorioPavimentos()">
+          <option value="">Todos os status</option>
+          <option>Pendente</option><option>Em produção</option><option>Concluído</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><table id="tabelaPavimentos"></table></div>
+    </div>
+    <div class="panel">
+      <h2>➕ Cadastrar Redes Frigorígenas (por pavimento)</h2>
+      <div class="form-grid"><div><label>Pavimento *</label><input id="r_pavimento" placeholder="Ex: 14"></div></div>
+      <h3 style="font-size:14px;color:#0f3460;margin:14px 0 10px">🏠 Finais / UEs do Pavimento</h3>
+      <div id="rUesContainer"></div>
+      <button class="btn small" onclick="adicionarUe()">➕ Adicionar novo final ou UE</button>
+      <div style="margin-top:14px"><button class="btn" onclick="salvarRedes()">💾 Salvar Redes do Pavimento</button></div>
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">💡 Informe o pavimento e adicione cada final/UE. Dentro de cada UE, adicione os ambientes com as bitolas e o tamanho de cada rede.</p>
+    </div>
+    <div class="panel">
+      <h2>📋 Redes Cadastradas</h2>
+      <div class="filters">
+        <select id="filtroRedStatus" onchange="renderRedes()">
+          <option value="">Todos os status</option>
+          <option>Pendente</option><option>Enviado para produção</option><option>Concluída</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><table id="tabelaRedes"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-fabricacao" class="hidden">
+    <div class="cards" id="cardsFabricacao"></div>
+    <div class="panel">
+      <h2>🏭 Fila de Produção</h2>
+      <div class="filters">
+        <select id="filtroFabObra" onchange="renderFilaProducao();renderRedesProduzidas()"><option value="">Todas as obras</option></select>
+        <select id="filtroFabStatus" onchange="renderFilaProducao()">
+          <option value="">Todos os status</option>
+          <option>Na fila</option><option>Em produção</option><option>Pausada</option>
+        </select>
+        <button class="btn small" onclick="adicionarPendentesPainel()">➕ Adicionar pendentes da obra</button>
+      </div>
+      <div id="resumoFilaProducao" style="margin-bottom:10px"></div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:10px">💡 As redes entram aqui ao gerar as etiquetas de um pavimento. Use ▲▼ ou arraste a linha para mudar a ordem. Prazo estimado: <b>200 m/dia</b>.</p>
+      <div style="overflow-x:auto"><table id="tabelaFabricacao"></table></div>
+    </div>
+    <div class="panel">
+      <h2>✅ Redes Produzidas</h2>
+      <div class="filters"><select id="filtroFabObraProd" onchange="renderRedesProduzidas()"><option value="">Todas as obras</option></select></div>
+      <div id="resumoRedesProduzidas" style="margin-bottom:10px"></div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:10px">💡 Quando um pavimento é marcado como <b>Concluída</b>, ele sai da fila e entra automaticamente aqui.</p>
+      <div style="overflow-x:auto"><table id="tabelaRedesProduzidas"></table></div>
+    </div>
+    <div class="panel">
+      <h2>📋 Apontar Produção do Dia</h2>
+      <div class="form-grid">
+        <div><label>Data</label><input id="fp_data" type="date"></div>
+        <div><label>Metros produzidos no dia</label><input id="fp_metros" type="number" step="0.01" min="0" placeholder="Ex: 45,5"></div>
+        <div><label>Observações</label><input id="fp_obs" placeholder="Faltou material, só meio período..."></div>
+      </div>
+      <h3 style="font-size:14px;color:#0f3460;margin:14px 0 10px">👥 Colaboradores na Fábrica neste dia</h3>
+      <div class="mo-grid" id="fpColaboradoresContainer"></div>
+      <button class="btn small" onclick="preencherColabsFabrica()">🔁 Atualizar lista de colaboradores</button>
+      <div style="margin-top:14px"><button class="btn" onclick="salvarProducaoDia()">💾 Registrar Produção do Dia</button></div>
+    </div>
+    <div class="panel">
+      <h2>📈 Relatório de Produção</h2>
+      <div class="cards" id="cardsFabProd"></div>
+      <div class="filters">
+        <input type="date" id="fpDataIni" onchange="renderRelatorioFabricacao()">
+        <input type="date" id="fpDataFim" onchange="renderRelatorioFabricacao()">
+        <button class="btn small" onclick="imprimirRelatorioProducao()">🖨️ Imprimir Relatório</button>
+      </div>
+      <div style="overflow-x:auto"><table id="relatorioFabricacao"></table></div>
+    </div>
+    <div class="panel">
+      <h2>🧮 Previsão de Material (redes pendentes: cobre, esponjoso e cabo PP)</h2>
+      <div id="previsaoMaterial"></div>
+    </div>
+  </section>
+
+  <section id="tab-empreiteiros" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Empreiteiro</h2>
+      <div class="form-grid">
+        <div><label>Nome do Empreiteiro</label><input id="emp_nome" placeholder="Ex: Empreiteiro Silva"></div>
+      </div>
+      <button class="btn" onclick="salvarEmpreiteiro()">💾 Salvar Empreiteiro</button>
+    </div>
+    <div class="panel">
+      <h2>📋 Empreiteiros Cadastrados</h2>
+      <div style="overflow-x:auto"><table id="tabelaEmpreiteiros"></table></div>
+    </div>
+    <div class="panel">
+      <h2>➕ Novo Contrato com Empreiteiro</h2>
+      <div class="form-grid">
+        <div><label>Empreiteiro</label><select id="c_empreiteiro"></select></div>
+        <div><label>Obra</label><select id="c_obra" onchange="preencherServicosContrato()"></select></div>
+        <div><label>Serviço</label><select id="c_servico" onchange="preencherTarefasContrato()"></select></div>
+        <div><label>Tarefa</label><select id="c_tarefa"></select></div>
+        <div><label>Valor do Contrato (R$)</label><input id="c_valor" type="number" step="0.01" min="0" placeholder="Ex: 40000"></div>
+      </div>
+      <div id="c_verbaInfo" style="font-size:13px;color:#0f3460;background:#e0e7ff;border-radius:6px;padding:10px 12px;margin-bottom:12px"></div>
+      <button class="btn" onclick="salvarContratoEmpreiteiro()">💾 Salvar Contrato</button>
+    </div>
+    <div class="panel">
+      <h2>📋 Contratos com Empreiteiros</h2>
+      <div style="overflow-x:auto"><table id="tabelaContratosEmpreiteiro"></table></div>
+    </div>
+    <div class="panel">
+      <h2>📏 Medições / Pagamentos do Empreiteiro</h2>
+      <div class="form-grid">
+        <div><label>Contrato</label><select id="m_contrato"></select></div>
+        <div><label>Data da Medição</label><input id="m_data" type="date"></div>
+        <div><label>Valor da Medição (R$)</label><input id="m_valor" type="number" step="0.01" min="0" placeholder="Ex: 10000"></div>
+        <div><label>Observações</label><input id="m_obs" placeholder="Ex: 1ª medição"></div>
+      </div>
+      <button class="btn" onclick="salvarMedicao()">💾 Registrar Medição</button>
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">💡 Cada medição abate do <b>saldo do contrato</b> e da <b>verba disponível do serviço</b>. A verba reduzida também reduz os <b>dias disponíveis</b> da obra automaticamente (pela taxa diária).</p>
+    </div>
+    <div class="panel">
+      <h2>📊 Resumo dos Empreiteiros</h2>
+      <div id="resumoEmpreiteiros"></div>
+    </div>
+  </section>
+
+  <section id="tab-ferramentas" class="hidden">
+    <div class="panel">
+      <h2>➕ Cadastrar Ferramenta</h2>
+      <div class="form-grid">
+        <div><label>Nome da Ferramenta</label><input id="f_nome" placeholder="Ex: Furadeira"></div>
+        <div><label>Código</label><input id="f_codigo" placeholder="Ex: FUR-001"></div>
+        <div><label>Categoria</label>
+          <select id="f_categoria">
+            <option>Ferramenta elétrica</option><option>Ferramenta manual</option>
+            <option>Equipamento de medição</option><option>EPI</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="salvarFerramenta()">💾 Salvar Ferramenta</button>
+    </div>
+    <div class="panel">
+      <h2>🔧 Atribuir Ferramenta a Colaborador</h2>
+      <div class="form-grid">
+        <div><label>Ferramenta</label><select id="f_sel"></select></div>
+        <div><label>Colaborador</label><select id="f_colaborador"></select></div>
+        <div><label>Data de Entrega</label><input id="f_entrega" type="date"></div>
+        <div><label>Data de Devolução</label><input id="f_devolucao" type="date"></div>
+        <div><label>Observações</label><input id="f_obs" placeholder="Observações"></div>
+      </div>
+      <button class="btn" onclick="atribuirFerramenta()">💾 Atribuir</button>
+    </div>
+    <div class="panel">
+      <h2>📋 Ferramentas por Colaborador</h2>
+      <div class="filters">
+        <select id="filtroFerrColab" onchange="renderFerramentas()"><option value="">Todos os colaboradores</option></select>
+        <select id="filtroFerrStatus" onchange="renderFerramentas()">
+          <option value="">Todos os status</option>
+          <option value="disponivel">Disponível</option>
+          <option value="emuso">Em uso</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><table id="tabelaFerramentas"></table></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DIA_PADRAO = 8.75;
+const FUNCOES_PADRAO = ['Mecânico','Auxiliar de Mecânico','Eletricista','Auxiliar de Eletricista','Engenheiro de Programação'];
+const dadosIniciais = {
+  tiposServico: ['Sistema VRF','Rede de Dutos','Split','Ventilação e Exaustão Mecânica','Exaustão de Cozinha','SDAI','Outro'],
+  engenheiros: ['Alysson','Daniel','Lucas','Welder'],
+  empreiteiros: [],
+  contratosEmpreiteiro: [],
+  colaboradores: [
+    {nome:"Evelton", funcao:"Mecânico"},{nome:"Francisco", funcao:"Auxiliar de Mecânico"},
+    {nome:"Valdemir", funcao:"Mecânico"},{nome:"Kauã", funcao:"Auxiliar de Mecânico"},
+    {nome:"Flávio", funcao:"Mecânico"},{nome:"Jenilson", funcao:"Auxiliar de Mecânico"},
+    {nome:"Emerson", funcao:"Auxiliar de Mecânico"},{nome:"Genilson", funcao:"Mecânico"},
+    {nome:"Vinícius", funcao:"Mecânico"},{nome:"Idoval", funcao:"Auxiliar de Mecânico"},
+    {nome:"Gustavo", funcao:"Mecânico"},{nome:"Robson", funcao:"Mecânico"},
+    {nome:"Rafael", funcao:"Auxiliar de Mecânico"},{nome:"Pedro", funcao:"Auxiliar de Mecânico"},
+    {nome:"Cleidimar", funcao:"Mecânico"},{nome:"Houdennig", funcao:"Auxiliar de Mecânico"},
+    {nome:"Ronnie Galiza", funcao:"Eletricista"},{nome:"Jean Carlos", funcao:"Auxiliar de Eletricista"},
+    {nome:"Leandro Almeida", funcao:"Mecânico"},{nome:"Carlos Antônio", funcao:"Auxiliar de Mecânico"},
+    {nome:"Ricardo Pereira", funcao:"Mecânico"},{nome:"Jonatas", funcao:"Auxiliar de Mecânico"},
+    {nome:"Wellington", funcao:"Mecânico"},{nome:"Paulo Ricardo", funcao:"Auxiliar de Mecânico"},
+    {nome:"Kleuson", funcao:"Mecânico"},{nome:"Victor", funcao:"Auxiliar de Mecânico"},
+    {nome:"Valdinere", funcao:"Eletricista"},{nome:"Railson", funcao:"Auxiliar de Eletricista"}
+  ],
+  equipes: [
+    {nome:"Equipe 01", membros:["Evelton","Francisco"]},{nome:"Equipe 02", membros:["Valdemir","Kauã"]},
+    {nome:"Equipe 03", membros:["Flávio","Jenilson"]},{nome:"Equipe 04", membros:["Genilson","Vinícius"]},
+    {nome:"Equipe 05", membros:["Robson","Rafael"]},{nome:"Equipe 06", membros:["Gustavo","Pedro"]},
+    {nome:"Equipe 07", membros:["Cleidimar","Houdennig"]},{nome:"Equipe 08", membros:["Ronnie Galiza","Jean Carlos"]},
+    {nome:"Equipe 09", membros:["Leandro Almeida","Carlos Antônio"]},{nome:"Equipe 10", membros:["Ricardo Pereira","Jonatas"]},
+    {nome:"Equipe 11", membros:["Wellington","Paulo Ricardo"]},{nome:"Equipe 12", membros:["Kleuson","Victor"]},
+    {nome:"Equipe 13", membros:["Valdinere","Railson"]}
+  ],
+  obras: [
+    {nome:"OBRA TESTE 50", engenheiro:"Daniel", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[
+      {tipo:"AR CONDICIONADO", verbaMO:50000, diasExecucao:50, tipoMaoObra:"Própria", verbaEmpreiteiro:0, tarefas:[
+        {descricao:"Montagem de Infra Frigorígena", unidade:"50m"},
+        {descricao:"Teste de Estanqueidade", unidade:"1 dia"}
+      ]},
+      {tipo:"DUTOS", verbaMO:50000, diasExecucao:50, tipoMaoObra:"Empreiteira", verbaEmpreiteiro:40000, tarefas:[
+        {descricao:"Montagem de Rede dutos Ventilação", unidade:"150m"},
+        {descricao:"Fechamento Elétrico", unidade:"1 dia"}
+      ]}
+    ]},
+    {nome:"AERO 17", engenheiro:"Daniel", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[
+      {tipo:"Sistema VRF", verbaMO:60000, diasExecucao:60, tipoMaoObra:"Própria", verbaEmpreiteiro:0, tarefas:[
+        {descricao:"Montagem de Infra Frigorígena", unidade:"50m"},
+        {descricao:"Montagem de Infra Comando", unidade:"50m"}
+      ]}
+    ]},
+    {nome:"AMBIENTE MIX", engenheiro:"Daniel", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[]},
+    {nome:"AQUILA ITUMBIARA", engenheiro:"Lucas", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[]},
+    {nome:"CASA CONCEITO (AMB-057/26)", engenheiro:"Alysson", status:"Não iniciada", tipo:"Residencial", obs:"", servicos:[]},
+    {nome:"CEROF", engenheiro:"Daniel", status:"Em andamento", tipo:"Obra Pública", obs:"", servicos:[]},
+    {nome:"CITY 23", engenheiro:"Welder", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[]},
+    {nome:"GRAN LIFE", engenheiro:"Alysson", status:"Concluída", tipo:"Residencial", obs:"", servicos:[]},
+    {nome:"HOSPITAL DO CÂNCER INHUMAS", engenheiro:"Alysson", status:"Concluída", tipo:"Hospitalar", obs:"", servicos:[]},
+    {nome:"IMPERADOR MARISTA", engenheiro:"Lucas", status:"Em andamento", tipo:"Comercial", obs:"", servicos:[]},
+    {nome:"JARDIM AREIÃO", engenheiro:"Daniel", status:"Atrasada", tipo:"Residencial", obs:"", servicos:[]},
+    {nome:"RED HOUSE", engenheiro:"Welder", status:"Em andamento", tipo:"Residencial", obs:"", servicos:[]},
+    {nome:"SUNSET PARK (AMB-001/25)", engenheiro:"Welder", status:"Paralisada", tipo:"Residencial", obs:"", servicos:[]}
+  ],
+  apontamentos: [
+    {data:"2026-09-03", obra:"AERO 17", colaborador:"Evelton", funcao:"Mecânico", horas:8.75, servico:"Sistema VRF", tarefa:"Montagem de Infra Frigorígena", obs:"", origem:"manual", situacao:"Trabalhado"},
+    {data:"2026-09-03", obra:"AERO 17", colaborador:"Francisco", funcao:"Auxiliar de Mecânico", horas:8.75, servico:"Sistema VRF", tarefa:"Montagem de Infra Frigorígena", obs:"", origem:"manual", situacao:"Trabalhado"},
+    {data:"2026-09-04", obra:"AERO 17", colaborador:"Ronnie Galiza", funcao:"Eletricista", horas:8.75, servico:"Sistema VRF", tarefa:"Montagem de Infra Comando", obs:"", origem:"manual", situacao:"Trabalhado"}
+  ],
+  alocacoes: [
+    {id:"a1", equipe:"Equipe 01", obra:"AMBIENTE MIX", inicio:"2026-07-07", fim:"2026-09-20", obs:"Instalação frigorígena 18º pav", servico:"", tarefa:"", concluida:false},
+    {id:"a2", equipe:"Equipe 02", obra:"RED HOUSE", inicio:"2026-07-09", fim:"2026-09-20", obs:"Rede frigorígena", servico:"", tarefa:"", concluida:false},
+    {id:"a3", equipe:"Equipe 03", obra:"AERO 17", inicio:"2026-07-14", fim:"2026-09-01", obs:"Pressurização de escadas", servico:"Sistema VRF", tarefa:"Montagem de Infra Frigorígena", concluida:false},
+    {id:"a4", equipe:"Equipe 04", obra:"AQUILA ITUMBIARA", inicio:"2026-07-03", fim:"2026-09-20", obs:"Instalação de UTAs", servico:"", tarefa:"", concluida:false},
+    {id:"a5", equipe:"Equipe 07", obra:"IMPERADOR MARISTA", inicio:"2026-07-16", fim:"2026-09-20", obs:"Rede frigorígena", servico:"", tarefa:"", concluida:false}
+  ],
+  ferramentas: [
+    {nome:"Furadeira", codigo:"FUR-001", categoria:"Ferramenta elétrica", colaborador:"Evelton", entrega:"2026-09-01", devolucao:"", obs:""},
+    {nome:"Parafusadeira", codigo:"PAR-001", categoria:"Ferramenta elétrica", colaborador:"Valdemir", entrega:"2026-09-01", devolucao:"", obs:""},
+    {nome:"Multímetro", codigo:"MUL-001", categoria:"Equipamento de medição", colaborador:"Ronnie Galiza", entrega:"2026-08-20", devolucao:"", obs:""},
+    {nome:"Maçarico", codigo:"MAC-001", categoria:"Ferramenta manual", colaborador:"", entrega:"", devolucao:"", obs:""},
+    {nome:"Manômetro digital", codigo:"MAN-001", categoria:"Equipamento de medição", colaborador:"", entrega:"", devolucao:"", obs:""}
+  ]
+};
+
+// ===== ESTADO =====
+let dados = carregar();
+
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ===== DATAS SEMPRE NO FUSO LOCAL (evita virar o dia após as 21h no UTC) =====
+function fmtDataLocal(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function hoje() {
+  return fmtDataLocal(new Date());
+}
+
+function carregar() {
+  let d;
+  try {
+    const raw = localStorage.getItem('gestao_obras_joule_v4');
+    if (raw) d = JSON.parse(raw);
+  } catch (e) { d = null; }
+  if (!d) d = JSON.parse(JSON.stringify(dadosIniciais));
+  if (!d.alocacoes) d.alocacoes = [];
+  if (!d.apontamentos) d.apontamentos = [];
+  if (!d.redes) d.redes = [];
+  if (!d.painelFabricacao) d.painelFabricacao = [];
+  if (!d.produtividade) d.produtividade = [];
+  if (!d.ferramentas) d.ferramentas = [];
+  if (!d.empreiteiros) d.empreiteiros = [];
+  if (!d.contratosEmpreiteiro) d.contratosEmpreiteiro = [];
+  if (!d.equipes) d.equipes = [];
+  if (!d.obras) d.obras = [];
+  if (!d.colaboradores) d.colaboradores = [];
+  if (!d.engenheiros) d.engenheiros = [];
+  if (!d.funcoes) d.funcoes = [];
+  if (!d.tiposServico) d.tiposServico = [];
+
+  d.obras.forEach(o => {
+    if ((o.servicos || []).length === 0 && (o.maoDeObra || []).length > 0) {
+      o.servicos = [{
+        tipo: 'GERAL',
+        verbaMO: 0,
+        diasExecucao: o.maoDeObra.reduce((s, m) => s + m.dias, 0),
+        tipoMaoObra: 'Própria',
+        verbaEmpreiteiro: 0,
+        tarefas: []
+      }];
+    }
+    (o.servicos || []).forEach(s => {
+      if (s.verbaMO === undefined) s.verbaMO = 0;
+      if (s.diasExecucao === undefined) s.diasExecucao = 0;
+      if (!s.tipoMaoObra) s.tipoMaoObra = 'Própria';
+      if (s.verbaEmpreiteiro === undefined) s.verbaEmpreiteiro = 0;
+      if (!s.tarefas) s.tarefas = [];
+    });
+  });
+  d.alocacoes.forEach(a => {
+    if (!a.id) a.id = gerarId();
+    if (a.servico === undefined) a.servico = '';
+    if (a.tarefa === undefined) a.tarefa = '';
+    if (a.concluida === undefined) a.concluida = false;
+  });
+  d.apontamentos.forEach(a => {
+    if (!a.origem) a.origem = 'manual';
+    if (!a.situacao) a.situacao = 'Trabalhado';
+  });
+  d.redes.forEach(r => { if (!r.status) r.status = 'Pendente'; });
+  return d;
+}
+
+function salvar() {
+  localStorage.setItem('gestao_obras_joule_v4', JSON.stringify(dados));
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function fmtData(d) {
+  if (!d) return '—';
+  const p = String(d).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+}
+
+function fmtNum(n) { return Number(n || 0).toFixed(1).replace('.', ','); }
+function fmtNum2(n) { return Number(n || 0).toFixed(2).replace('.', ','); }
+function fmtMoeda(n) { return Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+// ===== NAVEGAÇÃO =====
+function mudarAba(aba) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('nav button[data-tab="' + aba + '"]');
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+  const sec = document.getElementById('tab-' + aba);
+  if (sec) sec.classList.remove('hidden');
+  if (aba === 'visao') renderVisao();
+  if (aba === 'obras') { preencherSelectEngenheiros(); renderObras(); preencherSelectRelatorio(); gerarRelatorioMaoDeObra(); }
+  if (aba === 'apontamentos') { preencherSelectsAp(); renderApontamentos(); }
+  if (aba === 'evolucao') { preencherFiltroEvolucao(); renderEvolucao(); }
+  if (aba === 'equipes') { preencherSelectsEquipes(); renderEquipes(); }
+  if (aba === 'colaboradores') { preencherSelectsColaboradores(); renderColaboradores(); }
+  if (aba === 'engenheiros') { preencherSelectEngenheiros(); renderEngenheirosAba(); }
+  if (aba === 'redes') { preencherSelectRedes(); }
+  if (aba === 'fabricacao') { preencherSelectsFabricacao(); renderCardsFabricacao(); renderFilaProducao(); renderRedesProduzidas(); renderRelatorioFabricacao(); }
+  if (aba === 'empreiteiros') { preencherSelectsEmpreiteiros(); renderEmpreiteiros(); renderContratosEmpreiteiro(); renderResumoEmpreiteiros(); }
+  if (aba === 'ferramentas') { preencherSelectsFerramentas(); renderFerramentas(); }
+}
+
+// ===== STATUS =====
+const STATUS_ORDEM = ['Em andamento','Concluída','Atrasada','Não iniciada','Paralisada','Aguardando equipe'];
+
+function corStatus(status) {
+  if (status === 'Em andamento') return 'info';
+  if (status === 'Concluída') return 'ok';
+  if (status === 'Atrasada') return 'crit';
+  if (status === 'Não iniciada') return 'neutral';
+  if (status === 'Paralisada') return 'warn';
+  if (status === 'Aguardando equipe') return 'roxo';
+  return 'neutral';
+}
+
+function todasFuncoes() {
+  const set = new Set(FUNCOES_PADRAO);
+  dados.funcoes.forEach(f => set.add(f));
+  dados.colaboradores.forEach(c => set.add(c.funcao));
+  return [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+
+function todosTiposServico() {
+  const set = new Set(['Sistema VRF','Rede de Dutos','Split','Ventilação e Exaustão Mecânica','Exaustão de Cozinha','SDAI','Outro']);
+  dados.tiposServico.forEach(t => set.add(t));
+  dados.obras.forEach(o => (o.servicos || []).forEach(s => set.add(s.tipo)));
+  return [...set];
+}
+
+// ===== CONSUMO (VERBA + DIAS) =====
+// REGRA DE DIAS: a cada 2 pessoas-dia trabalhadas abate 1 dia da obra.
+function diasObraPorHoras(horas) {
+  return horas / DIA_PADRAO / 2;
+}
+
+function taxaDiariaServico(s) {
+  return s.diasExecucao > 0 ? (s.verbaMO || 0) / s.diasExecucao : 0;
+}
+
+// Verba consumida por empreiteiros = soma das medições dos contratos do serviço
+function verbaEmpreiteiroServico(obraNome, servicoTipo) {
+  return dados.contratosEmpreiteiro
+    .filter(c => c.obra === obraNome && c.servico === servicoTipo)
+    .reduce((s, c) => s + (c.medicoes || []).reduce((m, x) => m + (x.valor || 0), 0), 0);
+}
+
+function diasPropriaServico(obra, s) {
+  const h = hoje();
+  const horas = dados.apontamentos
+    .filter(a => a.obra === obra.nome && a.servico === s.tipo && !(a.origem === 'auto' && a.data > h) && a.situacao !== 'Falta' && a.situacao !== 'BH')
+    .reduce((sum, a) => sum + a.horas, 0);
+  return diasObraPorHoras(horas);
+}
+
+function apontamentosDaObra(obra) {
+  const h = hoje();
+  return dados.apontamentos.filter(a =>
+    a.obra === obra.nome &&
+    !(a.origem === 'auto' && a.data > h) &&
+    a.situacao !== 'Falta' && a.situacao !== 'BH'
+  );
+}
+
+// Balde "SEM SERVIÇO DEFINIDO": apontamentos sem serviço vinculado também abatem os dias
+function consumoSemServico(obra) {
+  const servicos = obra.servicos || [];
+  const tipos = servicos.map(s => s.tipo);
+  const horas = apontamentosDaObra(obra)
+    .filter(a => tipos.indexOf(a.servico) === -1)
+    .reduce((s, a) => s + a.horas, 0);
+  const dias = diasObraPorHoras(horas);
+  const verbaTotal = servicos.reduce((s, x) => s + (x.verbaMO || 0), 0);
+  const diasTotal = servicos.reduce((s, x) => s + (x.diasExecucao || 0), 0);
+  const taxaMedia = diasTotal > 0 ? verbaTotal / diasTotal : 0;
+  return { horas: horas, dias: dias, verba: dias * taxaMedia, taxaMedia: taxaMedia };
+}
+
+function consumoObra(obra) {
+  const servicos = obra.servicos || [];
+  let verbaTotal = 0, diasTotal = 0, verbaUsada = 0, diasUsados = 0;
+  servicos.forEach(s => {
+    verbaTotal += s.verbaMO || 0;
+    diasTotal += s.diasExecucao || 0;
+    const taxa = taxaDiariaServico(s);
+    const diasPropria = diasPropriaServico(obra, s);
+    const verbaEmp = verbaEmpreiteiroServico(obra.nome, s.tipo);
+    const verbaServ = diasPropria * taxa + verbaEmp;
+    verbaUsada += verbaServ;
+    diasUsados += taxa > 0 ? verbaServ / taxa : diasPropria;
+  });
+  const sem = consumoSemServico(obra);
+  diasUsados += sem.dias;
+  verbaUsada += sem.verba;
+  return {
+    verbaTotal: verbaTotal,
+    diasTotal: diasTotal,
+    verbaUsada: verbaUsada,
+    diasUsados: diasUsados,
+    verbaRestante: verbaTotal - verbaUsada,
+    diasRestantes: diasTotal - diasUsados,
+    semServico: sem,
+    pct: verbaTotal > 0 ? (verbaUsada / verbaTotal) * 100 : 0
+  };
+}
+
+// % Físico da obra: soma das quantidades executadas ÷ soma das quantidades planejadas
+function pctFisicoObra(obra) {
+  const servicos = obra.servicos || [];
+  const h = hoje();
+  let somaPlan = 0, somaExec = 0;
+  servicos.forEach(s => {
+    (s.tarefas || []).forEach(t => {
+      const plan = parseQuantidade(t.unidade);
+      const ap = dados.apontamentos.filter(a => a.obra === obra.nome && a.servico === s.tipo && a.tarefa === t.descricao && !(a.origem === 'auto' && a.data > h) && a.situacao !== 'Falta' && a.situacao !== 'BH');
+      const hh = ap.reduce((sum, a) => sum + a.horas, 0);
+      let exec = (t.executado !== undefined && t.executado !== null && t.executado !== '') ? parseFloat(t.executado) : 0;
+      const unid = (t.unidade || '').toLowerCase();
+      if (exec === 0 && unid.indexOf('dia') > -1 && hh > 0) exec = hh / DIA_PADRAO / 2;
+      somaPlan += plan;
+      somaExec += exec;
+    });
+  });
+  return somaPlan > 0 ? (somaExec / somaPlan) * 100 : 0;
+}
+
+function diasReservadosFuturos(obra) {
+  const h = hoje();
+  const horas = dados.apontamentos
+    .filter(a => a.obra === obra.nome && a.origem === 'auto' && a.data > h && a.situacao !== 'Falta' && a.situacao !== 'BH')
+    .reduce((s, a) => s + a.horas, 0);
+  return diasObraPorHoras(horas);
+}
+
+function funcoesForaDaObra(equipeNome, obraNome) {
+  const eq = dados.equipes.find(e => e.nome === equipeNome);
+  const ob = dados.obras.find(o => o.nome === obraNome);
+  if (!eq || !ob || !ob.servicos) return [];
+  return (eq.membros || []).filter(m => {
+    const c = dados.colaboradores.find(x => x.nome === m);
+    return c && c.funcao === '';
+  });
+}
+
+// ===== VISÃO GERAL =====
+function renderVisao() {
+  const filtro = document.getElementById('filtroStatusVisao').value;
+  let obras = dados.obras.slice();
+  if (filtro) obras = obras.filter(o => o.status === filtro);
+
+  const totalObras = dados.obras.length;
+  const emAnd = dados.obras.filter(o => o.status === 'Em andamento').length;
+  const concl = dados.obras.filter(o => o.status === 'Concluída').length;
+  const atras = dados.obras.filter(o => o.status === 'Atrasada').length;
+  const paral = dados.obras.filter(o => o.status === 'Paralisada').length;
+  const naoIni = dados.obras.filter(o => o.status === 'Não iniciada').length;
+  const totDias = dados.obras.reduce((s, o) => s + consumoObra(o).diasTotal, 0);
+  const totCons = dados.obras.reduce((s, o) => s + consumoObra(o).diasUsados, 0);
+  const totVerba = dados.obras.reduce((s, o) => s + consumoObra(o).verbaTotal, 0);
+  const totVerbaUsada = dados.obras.reduce((s, o) => s + consumoObra(o).verbaUsada, 0);
+  const h = hoje();
+  const totHoras = dados.apontamentos.filter(a => !(a.origem === 'auto' && a.data > h) && a.situacao !== 'Falta' && a.situacao !== 'BH').reduce((s, a) => s + a.horas, 0);
+
+  document.getElementById('cardsVisao').innerHTML =
+    '<div class="card"><div class="label">Total de Obras</div><div class="value blue">' + totalObras + '</div></div>' +
+    '<div class="card"><div class="label">Em Andamento</div><div class="value blue">' + emAnd + '</div></div>' +
+    '<div class="card"><div class="label">Concluídas</div><div class="value green">' + concl + '</div></div>' +
+    '<div class="card"><div class="label">Atrasadas</div><div class="value red">' + atras + '</div></div>' +
+    '<div class="card"><div class="label">Paralisadas</div><div class="value orange">' + paral + '</div></div>' +
+    '<div class="card"><div class="label">Não Iniciadas</div><div class="value orange">' + naoIni + '</div></div>' +
+    '<div class="card"><div class="label">Dias Disponíveis</div><div class="value blue">' + fmtNum2(totDias) + '</div></div>' +
+    '<div class="card"><div class="label">Dias Consumidos</div><div class="value orange">' + fmtNum2(totCons) + '</div></div>' +
+    '<div class="card"><div class="label">Verba Total</div><div class="value blue">' + fmtMoeda(totVerba) + '</div></div>' +
+    '<div class="card"><div class="label">Verba Utilizada</div><div class="value orange">' + fmtMoeda(totVerbaUsada) + '</div></div>' +
+    '<div class="card"><div class="label">Horas Trabalhadas</div><div class="value blue">' + fmtNum2(totHoras) + '</div></div>' +
+    '<div class="card"><div class="label">Apontamentos</div><div class="value blue">' + dados.apontamentos.length + '</div></div>';
+
+  renderEngenheiros();
+  renderEquipesResumo();
+
+  const alertas = [];
+  obras.forEach(o => {
+    const c = consumoObra(o);
+    const fis = pctFisicoObra(o);
+    const dif = c.pct - fis;
+    if (dif > 20) alertas.push({ obra: o.nome, dif: dif, pct: c.pct, fis: fis });
+  });
+  const alertaEl = document.getElementById('alertaVisao');
+  if (alertaEl) {
+    if (alertas.length) {
+      alertaEl.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;margin-bottom:16px">' +
+        '<strong style="color:#991b1b">⚠️ Atenção: verba consumida muito à frente do avanço físico:</strong>' +
+        '<ul style="margin:8px 0 0 18px;color:#7f1d1d;font-size:13px">' +
+        alertas.map(a => '<li><b>' + a.obra + '</b>: verba ' + fmtNum2(a.pct) + '% vs físico ' + fmtNum2(a.fis) + '% (diferença de ' + fmtNum2(a.dif) + ' pontos)</li>').join('') +
+        '</ul></div>';
+    } else {
+      alertaEl.innerHTML = '';
+    }
+  }
+
+  let html = '<thead><tr><th>Obra</th><th>Engenheiro</th><th>Status</th><th>Dias Disponíveis</th><th>Dias Consumidos</th><th>Verba Disponível</th><th>Verba Utilizada</th><th>% Consumido</th><th>% Físico</th><th>Alerta</th><th>Progresso</th></tr></thead><tbody>';
+  obras.forEach(o => {
+    const c = consumoObra(o);
+    const fis = pctFisicoObra(o);
+    const dif = c.pct - fis;
+    const pct = Math.min(100, c.pct);
+    const cor = c.pct > 100 ? '#dc2626' : c.pct > 80 ? '#ea580c' : '#16a34a';
+    const badgeAlerta = dif > 20 ? '<span class="badge crit">⚠️ Verba à frente</span>' : dif < -20 ? '<span class="badge ok">Físico à frente</span>' : '<span class="badge neutral">OK</span>';
+    html += '<tr>' +
+      '<td><b>' + o.nome + '</b></td>' +
+      '<td>' + (o.engenheiro || '—') + '</td>' +
+      '<td><span class="badge ' + corStatus(o.status) + '">' + o.status + '</span></td>' +
+      '<td>' + fmtNum2(c.diasTotal) + '</td>' +
+      '<td>' + fmtNum2(c.diasUsados) + '</td>' +
+      '<td>' + fmtMoeda(c.verbaTotal) + '</td>' +
+      '<td>' + fmtMoeda(c.verbaUsada) + '</td>' +
+      '<td>' + fmtNum2(c.pct) + '%</td>' +
+      '<td>' + fmtNum2(fis) + '%</td>' +
+      '<td>' + badgeAlerta + '</td>' +
+      '<td><div class="progress"><div style="width:' + pct + '%;background:' + cor + '"></div></div></td>' +
+      '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaVisao').innerHTML = html;
+}
+
+function renderEngenheiros() {
+  const porEng = {};
+  dados.obras.forEach(o => {
+    const eng = o.engenheiro || 'Sem engenheiro';
+    if (!porEng[eng]) porEng[eng] = [];
+    porEng[eng].push(o);
+  });
+  let html = '';
+  Object.keys(porEng).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(eng => {
+    const obras = porEng[eng];
+    let stats = '';
+    STATUS_ORDEM.forEach(s => {
+      const n = obras.filter(o => o.status === s).length;
+      if (n > 0) stats += '<span class="badge ' + corStatus(s) + '">' + s + ': ' + n + '</span>';
+    });
+    let lista = '';
+    obras.forEach(o => {
+      lista += '<li><span><b>' + o.nome + '</b></span><span class="badge ' + corStatus(o.status) + '">' + o.status + '</span></li>';
+    });
+    html += '<div class="eng-card"><h3>👷 ' + eng + '</h3>' +
+      '<div class="eng-total">Total de obras: <b>' + obras.length + '</b></div>' +
+      '<div class="eng-stats">' + (stats || '<span class="badge neutral">Sem obras</span>') + '</div>' +
+      '<ul class="eng-obras">' + lista + '</ul></div>';
+  });
+  document.getElementById('gridEngenheiros').innerHTML = html || '<p style="color:#6b7280">Nenhum engenheiro cadastrado.</p>';
+}
+
+function renderEquipesResumo() {
+  const h = hoje();
+  let html = '';
+  dados.equipes.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(e => {
+    const membros = e.membros && e.membros.length ? e.membros.join(' + ') : '—';
+    const alocs = dados.alocacoes.filter(a => a.equipe === e.nome && !a.concluida).sort((a, b) => a.inicio.localeCompare(b.inicio));
+    const atual = alocs.find(a => a.inicio <= h && a.fim >= h);
+    const prox = alocs.find(a => a.inicio > h);
+    html += '<div class="semana-card"><h4>👷 ' + e.nome + '</h4>' +
+      '<div class="membros">' + membros + '</div>' +
+      (atual
+        ? '<div class="aloc atual"><div class="obra">📍 ' + atual.obra + '</div><div class="periodo">' + fmtData(atual.inicio) + ' a ' + fmtData(atual.fim) + '</div></div>'
+        : '<div class="aloc atual"><div class="obra">📍 Sem alocação atual</div></div>') +
+      (prox ? '<div class="aloc proxima"><div class="obra">➡️ ' + prox.obra + '</div><div class="periodo">' + fmtData(prox.inicio) + ' a ' + fmtData(prox.fim) + '</div></div>' : '') +
+      '</div>';
+  });
+  document.getElementById('gridEquipesResumo').innerHTML = html || '<p style="color:#6b7280">Nenhuma equipe cadastrada.</p>';
+}
+// ===== ENGENHEIROS =====
+function preencherSelectEngenheiros() {
+  if (!dados.engenheiros) dados.engenheiros = [];
+  dados.obras.forEach(o => {
+    if (o.engenheiro && !dados.engenheiros.includes(o.engenheiro)) dados.engenheiros.push(o.engenheiro);
+  });
+  dados.engenheiros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  document.getElementById('o_eng').innerHTML = dados.engenheiros.map(e => '<option>' + e + '</option>').join('');
+}
+
+function cadastrarNovoEngenheiro() {
+  const nome = prompt('Nome do novo engenheiro responsável:');
+  if (!nome || !nome.trim()) return;
+  const n = nome.trim();
+  if (!dados.engenheiros) dados.engenheiros = [];
+  if (dados.engenheiros.includes(n)) { toast('⚠️ Esse engenheiro já existe'); return; }
+  dados.engenheiros.push(n);
+  salvar();
+  preencherSelectEngenheiros();
+  document.getElementById('o_eng').value = n;
+  toast('✅ Engenheiro "' + n + '" cadastrado!');
+}
+
+function salvarEngenheiro() {
+  const nome = document.getElementById('eng_nome').value.trim();
+  if (!nome) { toast('⚠️ Informe o nome do engenheiro'); return; }
+  if (!dados.engenheiros) dados.engenheiros = [];
+  if (dados.engenheiros.some(e => e.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Engenheiro já cadastrado'); return; }
+  dados.engenheiros.push(nome);
+  dados.engenheiros.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  salvar();
+  document.getElementById('eng_nome').value = '';
+  preencherSelectEngenheiros();
+  renderEngenheirosAba();
+  toast('✅ Engenheiro cadastrado!');
+}
+
+function renderEngenheirosAba() {
+  if (!dados.engenheiros) dados.engenheiros = [];
+  let html = '<thead><tr><th>Nome</th><th>Obras Vinculadas</th><th>Ações</th></tr></thead><tbody>';
+  dados.engenheiros.forEach((e, i) => {
+    const obras = dados.obras.filter(o => o.engenheiro === e).map(o => o.nome);
+    html += '<tr><td><b>' + e + '</b></td><td>' + (obras.length ? obras.join(', ') : '—') +
+      '</td><td><button class="btn small danger" onclick="excluirEngenheiro(' + i + ')">🗑️</button></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaEngenheiros').innerHTML = html;
+}
+
+function excluirEngenheiro(i) {
+  const nome = dados.engenheiros[i];
+  const obras = dados.obras.filter(o => o.engenheiro === nome);
+  let msg = 'Excluir o engenheiro ' + nome + '?';
+  if (obras.length) msg += '\n\n⚠️ Ele está vinculado a ' + obras.length + ' obra(s): ' + obras.map(o => o.nome).join(', ') + '. As obras ficarão sem engenheiro.';
+  if (confirm(msg)) {
+    dados.engenheiros.splice(i, 1);
+    salvar();
+    preencherSelectEngenheiros();
+    renderEngenheirosAba();
+    toast('🗑️ Engenheiro excluído.');
+  }
+}
+
+// ===== SERVIÇOS DA OBRA (VERBA + DIAS) =====
+let obraEditandoRef = null; // referência da obra em edição (preserva executado e verba empreiteiro)
+
+function adicionarServico(tipo, verbaMO, diasExecucao, tipoMaoObra) {
+  const container = document.getElementById('servicosContainer');
+  const div = document.createElement('div');
+  div.className = 'servico-item';
+  div.innerHTML = '<div class="sv-head"><strong>Serviço</strong>' +
+      '<button class="btn small danger" onclick="removerServico(this)">✕ Remover serviço</button></div>' +
+    '<div class="form-grid">' +
+    '<div><label>Tipo de Serviço</label><input class="sv-tipo" placeholder="Ex: AR CONDICIONADO, DUTOS..." value="' + (tipo || '') + '"></div>' +
+    '<div><label>Verba MO (R$)</label><input class="sv-verba" type="number" step="0.01" min="0" placeholder="Ex: 50000" value="' + (verbaMO || '') + '"></div>' +
+    '<div><label>Dias de Execução</label><input class="sv-dias" type="number" step="0.01" min="0" placeholder="Ex: 50" value="' + (diasExecucao || '') + '"></div>' +
+    '<div><label>Tipo de Mão de Obra</label><select class="sv-tipo-mo">' +
+      '<option ' + (tipoMaoObra === 'Própria' ? 'selected' : '') + '>Própria</option>' +
+      '<option ' + (tipoMaoObra === 'Empreiteira' ? 'selected' : '') + '>Empreiteira</option>' +
+      '<option ' + (tipoMaoObra === 'Mista' ? 'selected' : '') + '>Mista</option>' +
+    '</select></div>' +
+    '</div>' +
+    '<div class="sv-tarefas"></div>' +
+    '<button class="btn small" onclick="adicionarTarefa(this)">➕ Adicionar tarefa</button>';
+  container.appendChild(div);
+}
+
+function removerServico(btn) { btn.closest('.servico-item').remove(); }
+
+function criarTarefa(descricao, unidade) {
+  const div = document.createElement('div');
+  div.className = 'tarefa-item';
+  div.innerHTML = '<input class="tf-desc" placeholder="Descrição da tarefa" value="' + (descricao || '') + '">' +
+    '<input class="tf-unid" placeholder="Unidade (ex: 50m, 2 dias, 15 unid)" value="' + (unidade || '') + '">' +
+    '<button class="btn small danger" onclick="removerTarefa(this)">✕</button>';
+  return div;
+}
+
+function adicionarTarefa(btn) {
+  btn.closest('.servico-item').querySelector('.sv-tarefas').appendChild(criarTarefa('', ''));
+}
+
+function removerTarefa(btn) { btn.closest('.tarefa-item').remove(); }
+
+function cadastrarNovoTipoServico() {
+  const nome = prompt('Nome do novo tipo de serviço (ex: Sistema SDAI):');
+  if (!nome || !nome.trim()) return;
+  const n = nome.trim();
+  if (todosTiposServico().includes(n)) { toast('⚠️ Esse tipo de serviço já existe'); return; }
+  if (!dados.tiposServico) dados.tiposServico = [];
+  dados.tiposServico.push(n);
+  salvar();
+  adicionarServico(n);
+  toast('✅ Tipo de serviço "' + n + '" cadastrado!');
+}
+
+function salvarObra() {
+  const nome = document.getElementById('o_nome').value.trim();
+  if (!nome) { toast('⚠️ Informe o nome da obra'); return; }
+
+  const antigos = obraEditandoRef ? (obraEditandoRef.servicos || []) : [];
+
+  const servicos = [...document.querySelectorAll('#servicosContainer .servico-item')].map(item => {
+    const tipo = item.querySelector('.sv-tipo').value.trim();
+    const antigoServ = antigos.find(x => x.tipo === tipo);
+    const antigasTarefas = antigoServ ? (antigoServ.tarefas || []) : [];
+
+    const tarefas = [...item.querySelectorAll('.tarefa-item')].map((t, pos) => {
+      const descricao = t.querySelector('.tf-desc').value.trim();
+      const unidade = t.querySelector('.tf-unid').value.trim();
+      let anterior = antigasTarefas.find(x => x.descricao === descricao);
+      if (!anterior) anterior = antigasTarefas[pos];
+      let exec = '';
+      if (anterior && anterior.executado !== undefined && anterior.executado !== null) exec = anterior.executado;
+      return { descricao: descricao, unidade: unidade, executado: exec };
+    }).filter(t => t.descricao);
+
+    return {
+      tipo: tipo,
+      verbaMO: parseFloat(String(item.querySelector('.sv-verba').value).replace(',', '.')) || 0,
+      diasExecucao: parseFloat(String(item.querySelector('.sv-dias').value).replace(',', '.')) || 0,
+      tipoMaoObra: item.querySelector('.sv-tipo-mo').value,
+      verbaEmpreiteiro: antigoServ ? (antigoServ.verbaEmpreiteiro || 0) : 0,
+      tarefas: tarefas
+    };
+  }).filter(s => s.tipo);
+
+  if (!servicos.length) { toast('⚠️ Adicione pelo menos um serviço com nome'); return; }
+
+  const nova = {
+    nome: nome,
+    engenheiro: document.getElementById('o_eng').value,
+    status: document.getElementById('o_status').value,
+    tipo: document.getElementById('o_tipo').value,
+    obs: document.getElementById('o_obs').value.trim(),
+    servicos: servicos
+  };
+
+  if (obraEditandoRef) {
+    const idx = dados.obras.indexOf(obraEditandoRef);
+    if (idx > -1) dados.obras[idx] = nova; else dados.obras.push(nova);
+  } else {
+    dados.obras.push(nova);
+  }
+  obraEditandoRef = null;
+
+  salvar();
+  limparFormObra();
+  renderObras();
+  toast('✅ Obra salva com sucesso!');
+}
+
+function renderObras() {
+  const f = document.getElementById('filtroObraStatus').value;
+  dados.obras.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  let obras = dados.obras;
+  if (f) obras = obras.filter(o => o.status === f);
+  let html = '<thead><tr><th>Obra</th><th>Engenheiro</th><th>Status</th><th>Dias Disponíveis</th><th>Dias Consumidos</th><th>Verba Disponível</th><th>Verba Utilizada</th><th>% Consumido</th><th>Tipo</th><th>Detalhe</th><th>Ações</th></tr></thead><tbody>';
+  obras.forEach(o => {
+    const idx = dados.obras.indexOf(o);
+    const c = consumoObra(o);
+    const pct = Math.min(100, c.pct);
+    const cor = c.pct > 100 ? '#dc2626' : c.pct > 80 ? '#ea580c' : '#16a34a';
+    html += '<tr>' +
+      '<td><b>' + o.nome + '</b></td>' +
+      '<td>' + (o.engenheiro || '—') + '</td>' +
+      '<td><span class="badge ' + corStatus(o.status) + '">' + o.status + '</span></td>' +
+      '<td>' + fmtNum2(c.diasTotal) + '</td>' +
+      '<td>' + fmtNum2(c.diasUsados) + '</td>' +
+      '<td>' + fmtMoeda(c.verbaTotal) + '</td>' +
+      '<td>' + fmtMoeda(c.verbaUsada) + '</td>' +
+      '<td>' + fmtNum2(c.pct) + '%</td>' +
+      '<td>' + o.tipo + '</td>' +
+      '<td><button class="btn small" onclick="toggleDetalhe(' + idx + ')">🔍</button></td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn small" onclick="editarObra(' + idx + ')">✏️</button>' +
+        '<button class="btn small danger" onclick="excluirObra(' + idx + ')">🗑️</button>' +
+      '</div></td></tr>' +
+      '<tr id="detalhe-' + idx + '" class="hidden"><td colspan="11">' + detalheServicos(o) + '</td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaObras').innerHTML = html;
+}
+
+function detalheServicos(o) {
+  const servicos = o.servicos || [];
+  const sem = consumoSemServico(o);
+  if (!servicos.length && sem.dias <= 0) {
+    return '<p style="color:#6b7280">Nenhum serviço cadastrado com verba. Edite a obra e preencha a verba e os dias de cada serviço.</p>';
+  }
+  let html = '<table style="margin:8px 0"><thead><tr>' +
+    '<th>Serviço</th><th>Tipo MO</th><th>Verba (R$)</th><th>Dias</th><th>Taxa R$/dia</th>' +
+    '<th>Dias Consumidos</th><th>Verba Utilizada</th><th>Saldo Dias</th><th>Saldo Verba</th><th>%</th><th>Ações</th>' +
+    '</tr></thead><tbody>';
+  servicos.forEach(s => {
+    const taxa = taxaDiariaServico(s);
+    const diasPropria = diasPropriaServico(o, s);
+    const verbaEmp = verbaEmpreiteiroServico(o.nome, s.tipo);
+    const verbaServ = diasPropria * taxa + verbaEmp;
+    const diasServ = taxa > 0 ? verbaServ / taxa : diasPropria;
+    const saldoDias = (s.diasExecucao || 0) - diasServ;
+    const saldoVerba = (s.verbaMO || 0) - verbaServ;
+    const pct = s.verbaMO > 0 ? (verbaServ / s.verbaMO) * 100 : 0;
+    const cor = pct > 100 ? '#dc2626' : pct > 80 ? '#ea580c' : '#16a34a';
+    const podeEmp = s.tipoMaoObra === 'Empreiteira' || s.tipoMaoObra === 'Mista';
+    html += '<tr>' +
+      '<td><b>' + s.tipo + '</b></td>' +
+      '<td>' + (s.tipoMaoObra || 'Própria') + '</td>' +
+      '<td>' + fmtMoeda(s.verbaMO) + '</td>' +
+      '<td>' + fmtNum2(s.diasExecucao) + '</td>' +
+      '<td>' + fmtMoeda(taxa) + '</td>' +
+      '<td>' + fmtNum2(diasServ) + '</td>' +
+      '<td>' + fmtMoeda(verbaServ) + '</td>' +
+      '<td>' + fmtNum2(saldoDias) + '</td>' +
+      '<td>' + fmtMoeda(saldoVerba) + '</td>' +
+      '<td><div class="progress"><div style="width:' + Math.min(100, pct) + '%;background:' + cor + '"></div></div> ' + fmtNum2(pct) + '%</td>' +
+      '<td>' + (podeEmp
+        ? '<button class="btn small" onclick="salvarVerbaEmpreiteiro(\'' + o.nome + '\',\'' + s.tipo + '\')">💰 Lançar verba empreiteiro</button>'
+        : '<span class="badge info">Apontamentos</span>') + '</td>' +
+      '</tr>';
+  });
+  if (sem.dias > 0) {
+    html += '<tr>' +
+      '<td><b>SEM SERVIÇO DEFINIDO</b></td>' +
+      '<td>—</td><td>—</td><td>—</td>' +
+      '<td>' + fmtMoeda(sem.taxaMedia) + '</td>' +
+      '<td>' + fmtNum2(sem.dias) + '</td>' +
+      '<td>' + fmtMoeda(sem.verba) + '</td>' +
+      '<td>—</td><td>—</td>' +
+      '<td><span class="badge warn">Sem serviço</span></td>' +
+      '<td><span class="badge neutral">Apontamentos</span></td>' +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function salvarVerbaEmpreiteiro(obraNome, servicoTipo) {
+  const obra = dados.obras.find(o => o.nome === obraNome);
+  if (!obra) return;
+  const s = (obra.servicos || []).find(x => x.tipo === servicoTipo);
+  if (!s) return;
+  const atual = verbaEmpreiteiroServico(obraNome, servicoTipo);
+  const valor = prompt('Verba utilizada com empreiteiro em "' + servicoTipo + '" (R$):\n\nAtual: ' + fmtMoeda(atual) + '\nDigite o valor TOTAL já gasto:', atual);
+  if (valor === null) return;
+  const v = parseFloat(String(valor).replace(',', '.'));
+  if (isNaN(v) || v < 0) { toast('⚠️ Informe um valor válido'); return; }
+  let c = dados.contratosEmpreiteiro.find(x => x.obra === obraNome && x.servico === servicoTipo && x.empreiteiro === '—');
+  if (!c) {
+    c = { id: gerarId(), empreiteiro: '—', obra: obraNome, servico: servicoTipo, tarefa: '', valorContrato: v, medicoes: [{ data: hoje(), valor: v, obs: 'Lançamento direto' }] };
+    dados.contratosEmpreiteiro.push(c);
+  } else {
+    c.valorContrato = v;
+    c.medicoes = [{ data: hoje(), valor: v, obs: 'Lançamento direto' }];
+  }
+  salvar();
+  renderObras();
+  renderVisao();
+  toast('✅ Verba do empreiteiro atualizada!');
+}
+
+function toggleDetalhe(i) {
+  const el = document.getElementById('detalhe-' + i);
+  if (el) el.classList.toggle('hidden');
+}
+
+function editarObra(i) {
+  const o = dados.obras[i];
+  if (!o) return;
+  obraEditandoRef = o;
+  document.getElementById('o_nome').value = o.nome;
+  document.getElementById('o_eng').value = o.engenheiro;
+  document.getElementById('o_status').value = o.status;
+  document.getElementById('o_tipo').value = o.tipo;
+  document.getElementById('o_obs').value = o.obs;
+  document.getElementById('servicosContainer').innerHTML = '';
+  (o.servicos || []).forEach(s => {
+    adicionarServico(s.tipo, s.verbaMO, s.diasExecucao, s.tipoMaoObra);
+    const ult = document.getElementById('servicosContainer').lastElementChild;
+    const cont = ult.querySelector('.sv-tarefas');
+    (s.tarefas || []).forEach(t => cont.appendChild(criarTarefa(t.descricao, t.unidade)));
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando obra "' + o.nome + '". Nada muda até você clicar em Salvar Obra.');
+}
+
+function excluirObra(i) {
+  if (confirm('Excluir esta obra?')) {
+    dados.obras.splice(i, 1);
+    salvar();
+    renderObras();
+    toast('🗑️ Obra excluída.');
+  }
+}
+
+function limparFormObra() {
+  document.getElementById('o_nome').value = '';
+  document.getElementById('o_obs').value = '';
+  document.getElementById('o_eng').selectedIndex = 0;
+  document.getElementById('o_status').value = 'Em andamento';
+  document.getElementById('o_tipo').value = 'Comercial';
+  document.getElementById('servicosContainer').innerHTML = '';
+  obraEditandoRef = null;
+}
+// ===== RELATÓRIO FINAL DE VERBA / MÃO DE OBRA =====
+function preencherSelectRelatorio() {
+  const sel = document.getElementById('relObra');
+  const obras = dados.obras.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  sel.innerHTML = '<option value="">Todas as obras</option>' + obras.map(o => '<option>' + o.nome + '</option>').join('');
+}
+
+function calcularLinhasRelatorio(obraF, dIni, dFim) {
+  const h = hoje();
+  let ap = dados.apontamentos.filter(a => !(a.origem === 'auto' && a.data > h) && a.situacao !== 'Falta' && a.situacao !== 'BH');
+  if (obraF) ap = ap.filter(a => a.obra === obraF);
+  if (dIni) ap = ap.filter(a => a.data >= dIni);
+  if (dFim) ap = ap.filter(a => a.data <= dFim);
+
+  const resultado = [];
+  let totalGeral = 0;
+  dados.obras.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(obra => {
+    if (obraF && obra.nome !== obraF) return;
+    const servicos = obra.servicos || [];
+    const sem = consumoSemServico(obra);
+    if (!servicos.length && sem.dias <= 0) return;
+    let totObra = 0;
+    const linhas = servicos.map(s => {
+      const taxa = taxaDiariaServico(s);
+      const horas = ap.filter(a => a.obra === obra.nome && a.servico === s.tipo).reduce((sum, a) => sum + a.horas, 0);
+      const diasPropria = diasObraPorHoras(horas);
+      const verbaEmp = verbaEmpreiteiroServico(obra.nome, s.tipo);
+      const verbaServ = diasPropria * taxa + verbaEmp;
+      const diasServ = taxa > 0 ? verbaServ / taxa : diasPropria;
+      const saldoVerba = (s.verbaMO || 0) - verbaServ;
+      const pct = s.verbaMO > 0 ? (verbaServ / s.verbaMO) * 100 : 0;
+      totObra += verbaServ;
+      return { s: s, diasPropria: diasPropria, verbaEmp: verbaEmp, verbaServ: verbaServ, diasServ: diasServ, saldoVerba: saldoVerba, pct: pct };
+    });
+    totObra += sem.verba;
+    totalGeral += totObra;
+    resultado.push({ obra: obra, linhas: linhas, total: totObra, semServico: sem });
+  });
+  return { itens: resultado, totalGeral: totalGeral };
+}
+
+function gerarRelatorioMaoDeObra() {
+  const obraF = document.getElementById('relObra').value;
+  const dIni = document.getElementById('relDataInicio').value;
+  const dFim = document.getElementById('relDataFim').value;
+  const res = calcularLinhasRelatorio(obraF, dIni, dFim);
+
+  let html = '';
+  res.itens.forEach(item => {
+    let tabela = '<thead><tr><th>Serviço</th><th>Tipo MO</th><th>Verba (R$)</th><th>Dias Previstos</th><th>Dias Utilizados</th><th>Verba Utilizada</th><th>Saldo Verba</th><th>% Utilizado</th></tr></thead><tbody>';
+    item.linhas.forEach(l => {
+      const cor = l.pct > 100 ? '#dc2626' : l.pct > 80 ? '#ea580c' : '#16a34a';
+      tabela += '<tr>' +
+        '<td><b>' + l.s.tipo + '</b></td>' +
+        '<td>' + (l.s.tipoMaoObra || 'Própria') + '</td>' +
+        '<td>' + fmtMoeda(l.s.verbaMO) + '</td>' +
+        '<td>' + fmtNum2(l.s.diasExecucao) + '</td>' +
+        '<td>' + fmtNum2(l.diasServ) + '</td>' +
+        '<td>' + fmtMoeda(l.verbaServ) + '</td>' +
+        '<td>' + fmtMoeda(l.saldoVerba) + '</td>' +
+        '<td><div class="progress"><div style="width:' + Math.min(100, l.pct) + '%;background:' + cor + '"></div></div> ' + fmtNum2(l.pct) + '%</td>' +
+        '</tr>';
+    });
+    if (item.semServico && item.semServico.dias > 0) {
+      tabela += '<tr>' +
+        '<td><b>SEM SERVIÇO DEFINIDO</b></td><td>—</td><td>—</td><td>—</td>' +
+        '<td>' + fmtNum2(item.semServico.dias) + '</td>' +
+        '<td>' + fmtMoeda(item.semServico.verba) + '</td>' +
+        '<td>—</td><td>—</td></tr>';
+    }
+    tabela += '</tbody>';
+    html += '<div class="panel" style="margin-bottom:16px">' +
+      '<h2>🏢 ' + item.obra.nome + ' <span class="badge neutral">Verba utilizada: ' + fmtMoeda(item.total) + '</span></h2>' +
+      '<div style="overflow-x:auto"><table>' + tabela + '</table></div></div>';
+  });
+
+  if (html) {
+    html += '<div class="panel" style="margin-bottom:16px;background:#0f3460;color:#fff">' +
+      '<h2 style="color:#fff">📊 TOTAL GERAL DE VERBA UTILIZADA: <span style="font-size:22px">' + fmtMoeda(res.totalGeral) + '</span></h2></div>';
+  }
+  document.getElementById('relatorioContainer').innerHTML = html || '<p style="color:#6b7280">Nenhum serviço com verba cadastrado para o filtro selecionado.</p>';
+}
+
+function imprimirRelatorioMaoDeObra() {
+  const obraF = document.getElementById('relObra').value;
+  const dIni = document.getElementById('relDataInicio').value;
+  const dFim = document.getElementById('relDataFim').value;
+  const res = calcularLinhasRelatorio(obraF, dIni, dFim);
+
+  let linhas = '';
+  res.itens.forEach(item => {
+    linhas += '<tr><td colspan="8" style="background:#e0e7ff;font-weight:700;color:#0f3460">🏢 ' + item.obra.nome + ' — Total: ' + fmtMoeda(item.total) + '</td></tr>';
+    item.linhas.forEach(l => {
+      linhas += '<tr><td>' + l.s.tipo + '</td><td>' + (l.s.tipoMaoObra || 'Própria') + '</td><td>' + fmtMoeda(l.s.verbaMO) + '</td>' +
+        '<td>' + fmtNum2(l.s.diasExecucao) + '</td><td>' + fmtNum2(l.diasServ) + '</td><td>' + fmtMoeda(l.verbaServ) + '</td>' +
+        '<td>' + fmtMoeda(l.saldoVerba) + '</td><td>' + fmtNum2(l.pct) + '%</td></tr>';
+    });
+    if (item.semServico && item.semServico.dias > 0) {
+      linhas += '<tr><td>SEM SERVIÇO DEFINIDO</td><td>—</td><td>—</td><td>—</td>' +
+        '<td>' + fmtNum2(item.semServico.dias) + '</td><td>' + fmtMoeda(item.semServico.verba) + '</td>' +
+        '<td>—</td><td>—</td></tr>';
+    }
+  });
+
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Mão de Obra - Joule Engenharia</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif}body{color:#1a1a2e;margin:24px}h1{font-size:20px;color:#0f3460;margin-bottom:4px}.sub{font-size:12px;color:#6b7280;margin-bottom:14px}.periodo{font-size:14px;font-weight:600;margin-bottom:16px;padding:8px 12px;background:#e0e7ff;border-radius:6px;display:inline-block}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#0f3460;color:#fff;text-align:left;padding:8px 10px}td{padding:8px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top}.total-geral td{background:#0f3460;color:#fff;font-weight:700}.rodape{margin-top:20px;font-size:11px;color:#6b7280}@media print{body{margin:12mm}}</style></head><body><h1>📊 Relatório Final de Mão de Obra Utilizada</h1><div class="sub">Joule Engenharia | Gestão de Obras</div><div class="periodo">📅 Período: ' + (dIni ? fmtData(dIni) : 'Início') + ' a ' + (dFim ? fmtData(dFim) : 'Hoje') + (obraF ? ' | Obra: ' + obraF : ' | Todas as obras') + '</div><table><thead><tr><th>Serviço</th><th>Tipo MO</th><th>Verba (R$)</th><th>Dias Previstos</th><th>Dias Utilizados</th><th>Verba Utilizada</th><th>Saldo Verba</th><th>% Utilizado</th></tr></thead><tbody>' + linhas + '<tr class="total-geral"><td colspan="5">TOTAL GERAL DE VERBA UTILIZADA</td><td>' + fmtMoeda(res.totalGeral) + '</td><td></td><td></td></tr></tbody></table><div class="rodape">Gerado em ' + new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</div><script>window.print();<\/script></body></html>');
+  janela.document.close();
+}
+
+// ===== APONTAMENTOS =====
+function preencherSelectsAp() {
+  document.getElementById('a_obra').innerHTML = dados.obras.map(o => '<option>' + o.nome + '</option>').join('');
+  const obrasAp = [...new Set(dados.apontamentos.map(a => a.obra))];
+  const obrasF = [...new Set(dados.obras.map(o => o.nome).concat(obrasAp))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  document.getElementById('filtroApObra').innerHTML = '<option value="">Todas as obras</option>' + obrasF.map(o => '<option>' + o + '</option>').join('');
+  const colabs = [...new Set(dados.apontamentos.map(a => a.colaborador))];
+  document.getElementById('filtroApColab').innerHTML = '<option value="">Todos os colaboradores</option>' + colabs.map(c => '<option>' + c + '</option>').join('');
+  document.getElementById('filtroApFuncao').innerHTML = '<option value="">Todas as funções</option>' + todasFuncoes().map(f => '<option>' + f + '</option>').join('');
+  preencherServicosApontamento();
+}
+
+function preencherServicosApontamento() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('a_obra').value);
+  const servicos = obra && obra.servicos ? obra.servicos : [];
+  document.getElementById('a_servico').innerHTML = '<option value="">Selecione o serviço...</option>' + servicos.map(s => '<option>' + s.tipo + '</option>').join('');
+  preencherTarefasApontamento();
+}
+
+function preencherTarefasApontamento() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('a_obra').value);
+  const servico = obra && obra.servicos ? obra.servicos.find(s => s.tipo === document.getElementById('a_servico').value) : null;
+  const tarefas = servico && servico.tarefas ? servico.tarefas : [];
+  document.getElementById('a_tarefa').innerHTML = '<option value="">Selecione a tarefa...</option>' + tarefas.map(t => '<option value="' + t.descricao + '">' + t.descricao + ' (' + t.unidade + ')</option>').join('');
+}
+
+function adicionarColaboradorApontamento(nome) {
+  const container = document.getElementById('aColaboradoresContainer');
+  const div = document.createElement('div');
+  div.className = 'mo-item';
+  div.innerHTML = '<label>Colaborador</label>' +
+    '<select class="ap-colab" onchange="preencherFuncaoApontamento(this)">' + dados.colaboradores.map(c => '<option ' + (c.nome === nome ? 'selected' : '') + '>' + c.nome + '</option>').join('') + '</select>' +
+    '<label>Função</label><input class="ap-funcao" readonly placeholder="Automática">' +
+    '<label>Horas no Dia</label><input class="ap-horas" type="number" step="0.01" min="0" value="8.75">' +
+    '<button class="btn small danger" onclick="removerColaboradorApontamento(this)" style="margin-top:6px">✕ Remover</button>';
+  container.appendChild(div);
+  preencherFuncaoApontamento(div.querySelector('.ap-colab'));
+}
+
+function removerColaboradorApontamento(btn) { btn.closest('.mo-item').remove(); }
+
+function preencherFuncaoApontamento(sel) {
+  const c = dados.colaboradores.find(x => x.nome === sel.value);
+  sel.closest('.mo-item').querySelector('.ap-funcao').value = c ? c.funcao : '';
+}
+
+function salvarApontamento() {
+  const data = document.getElementById('a_data').value;
+  const obra = document.getElementById('a_obra').value;
+  const servico = document.getElementById('a_servico').value;
+  const tarefa = document.getElementById('a_tarefa').value;
+  const obs = document.getElementById('a_obs').value.trim();
+  const linhas = [...document.querySelectorAll('#aColaboradoresContainer .mo-item')].map(item => ({
+    colaborador: item.querySelector('.ap-colab').value,
+    funcao: item.querySelector('.ap-funcao').value,
+    horas: parseFloat(item.querySelector('.ap-horas').value) || 0
+  }));
+  if (!data || !obra || !servico) { toast('⚠️ Preencha data, obra e serviço'); return; }
+  if (!linhas.length) { toast('⚠️ Adicione pelo menos um colaborador'); return; }
+
+  const conflitos = [];
+  const vistos = {};
+  linhas.forEach(l => {
+    if (!l.colaborador || l.horas <= 0) return;
+    if (vistos[l.colaborador]) { conflitos.push('⚠️ ' + l.colaborador + ' está repetido no mesmo lançamento. Remova a linha duplicada.'); return; }
+    vistos[l.colaborador] = true;
+    if (dados.apontamentos.some(a => a.data === data && a.obra === obra && a.colaborador === l.colaborador)) {
+      conflitos.push('⚠️ ' + l.colaborador + ' já possui lançamento em ' + obra + ' no dia ' + fmtData(data) + '. Lançamento duplicado bloqueado.');
+      return;
+    }
+    const outros = dados.apontamentos.filter(a => a.data === data && a.colaborador === l.colaborador && a.obra !== obra);
+    const horasOutras = outros.reduce((s, a) => s + a.horas, 0);
+    if (horasOutras + l.horas > DIA_PADRAO) {
+      const obrasOutras = [...new Set(outros.map(a => a.obra))].join(', ');
+      conflitos.push('⚠️ ' + l.colaborador + ' já tem ' + fmtNum2(horasOutras) + 'h em ' + obrasOutras + ' no dia ' + fmtData(data) + '. Somando ' + fmtNum2(l.horas) + 'h ultrapassaria as 8,75h do dia. Bloqueado.');
+    }
+  });
+
+  if (conflitos.length) { alert('🚫 Lançamento bloqueado:\n\n' + conflitos.join('\n\n')); return; }
+
+  linhas.forEach(l => {
+    if (l.colaborador && l.horas > 0) {
+      dados.apontamentos.push({ data: data, obra: obra, colaborador: l.colaborador, funcao: l.funcao, horas: l.horas, servico: servico, tarefa: tarefa, obs: obs, origem: 'manual', situacao: 'Trabalhado' });
+    }
+  });
+  salvar();
+  document.getElementById('a_obs').value = '';
+  document.getElementById('aColaboradoresContainer').innerHTML = '';
+  adicionarColaboradorApontamento();
+  preencherSelectsAp();
+  renderApontamentos();
+  toast('✅ Apontamento(s) registrado(s)!');
+}
+
+function marcarFalta(idx) {
+  const a = dados.apontamentos[idx];
+  if (!a) return;
+  a.situacao = 'Falta';
+  a.horas = 0;
+  salvar();
+  renderApontamentos();
+  toast('🔴 ' + a.colaborador + ' marcado como FALTA em ' + fmtData(a.data) + ': não abate do saldo da obra.');
+}
+
+function marcarBH(idx) {
+  const a = dados.apontamentos[idx];
+  if (!a) return;
+  a.situacao = 'BH';
+  a.horas = 0;
+  salvar();
+  renderApontamentos();
+  toast('🔵 ' + a.colaborador + ' marcado como BH em ' + fmtData(a.data) + ': não abate do saldo da obra.');
+}
+
+// Selects editáveis de Serviço e Tarefa na linha do apontamento
+function selectServicoApontamento(a, idx) {
+  const obra = dados.obras.find(o => o.nome === a.obra);
+  if (!obra) return (a.servico || '—');
+  const servicos = obra.servicos || [];
+  let html = '<select style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;max-width:170px" onchange="alterarServicoApontamento(' + idx + ', this.value)">';
+  html += '<option value="">—</option>';
+  servicos.forEach(s => {
+    html += '<option value="' + s.tipo + '"' + (a.servico === s.tipo ? ' selected' : '') + '>' + s.tipo + '</option>';
+  });
+  html += '</select>';
+  return html;
+}
+
+function selectTarefaApontamento(a, idx) {
+  const obra = dados.obras.find(o => o.nome === a.obra);
+  if (!obra) return (a.tarefa || '—');
+  const serv = (obra.servicos || []).find(s => s.tipo === a.servico);
+  const tarefas = serv && serv.tarefas ? serv.tarefas : [];
+  let html = '<select style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;max-width:190px" onchange="alterarTarefaApontamento(' + idx + ', this.value)">';
+  html += '<option value="">—</option>';
+  tarefas.forEach(t => {
+    html += '<option value="' + t.descricao + '"' + (a.tarefa === t.descricao ? ' selected' : '') + '>' + t.descricao + '</option>';
+  });
+  html += '</select>';
+  return html;
+}
+
+function alterarServicoApontamento(idx, valor) {
+  const a = dados.apontamentos[idx];
+  if (!a) return;
+  a.servico = valor;
+  a.tarefa = '';
+  a.origem = 'manual';
+  salvar();
+  renderApontamentos();
+  toast('✅ Serviço atualizado (origem agora Manual).');
+}
+
+function alterarTarefaApontamento(idx, valor) {
+  const a = dados.apontamentos[idx];
+  if (!a) return;
+  a.tarefa = valor;
+  a.origem = 'manual';
+  salvar();
+  renderApontamentos();
+  toast('✅ Tarefa atualizada (origem agora Manual).');
+}
+
+function renderApontamentos() {
+  const fO = document.getElementById('filtroApObra').value;
+  const fC = document.getElementById('filtroApColab').value;
+  const fF = document.getElementById('filtroApFuncao').value;
+  const fD = document.getElementById('filtroApData').value;
+  const fS = document.getElementById('filtroApSituacao').value;
+  let lista = dados.apontamentos;
+  if (fO) lista = lista.filter(a => a.obra === fO);
+  if (fC) lista = lista.filter(a => a.colaborador === fC);
+  if (fF) lista = lista.filter(a => a.funcao === fF);
+  if (fD) lista = lista.filter(a => a.data === fD);
+  if (fS) lista = lista.filter(a => (a.situacao || 'Trabalhado') === fS);
+  lista.sort((a, b) => b.data.localeCompare(a.data));
+
+  let html = '<thead><tr><th>Data</th><th>Obra</th><th>Colaborador</th><th>Função</th><th>Horas</th><th>Situação</th><th>Serviço</th><th>Tarefa</th><th>Origem</th><th>Obs.</th><th>Ações</th></tr></thead><tbody>';
+  lista.forEach(a => {
+    const idx = dados.apontamentos.indexOf(a);
+    const origem = a.origem === 'auto' ? '<span class="badge info">Auto</span>' : a.origem === 'fabricacao' ? '<span class="badge roxo">🏭 Fábrica</span>' : '<span class="badge neutral">Manual</span>';
+    const sit = a.situacao === 'Falta' ? '<span class="badge crit">Falta</span>' : a.situacao === 'BH' ? '<span class="badge info">BH</span>' : '<span class="badge ok">Trabalhado</span>';
+    html += '<tr><td>' + fmtData(a.data) + '</td><td>' + a.obra + '</td><td>' + a.colaborador + '</td><td>' + a.funcao + '</td>' +
+      '<td>' + fmtNum2(a.horas) + '</td><td>' + sit + '</td>' +
+      '<td>' + selectServicoApontamento(a, idx) + '</td>' +
+      '<td>' + selectTarefaApontamento(a, idx) + '</td>' +
+      '<td>' + origem + '</td><td>' + (a.obs || '—') + '</td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn small danger" onclick="marcarFalta(' + idx + ')" title="Marcar Falta (não abate do saldo)">Falta</button>' +
+        '<button class="btn small" onclick="marcarBH(' + idx + ')" title="Marcar BH (não abate do saldo)">BH</button>' +
+        '<button class="btn small danger" onclick="excluirApontamento(' + idx + ')">🗑️</button>' +
+      '</div></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaApontamentos').innerHTML = html;
+}
+
+function excluirApontamento(idx) {
+  if (confirm('Excluir este apontamento?')) {
+    dados.apontamentos.splice(idx, 1);
+    salvar();
+    preencherSelectsAp();
+    renderApontamentos();
+    toast('🗑️ Apontamento excluído.');
+  }
+}
+
+// ===== COLABORADORES =====
+let colaboradorEditando = null;
+
+function preencherSelectsColaboradores() {
+  document.getElementById('c_funcao').innerHTML = todasFuncoes().map(f => '<option>' + f + '</option>').join('');
+}
+
+function salvarColaborador() {
+  const nome = document.getElementById('c_nome').value.trim();
+  const funcao = document.getElementById('c_funcao').value;
+  if (!nome) { toast('⚠️ Informe o nome do colaborador'); return; }
+  if (colaboradorEditando) {
+    const idx = dados.colaboradores.findIndex(c => c.nome === colaboradorEditando);
+    if (idx === -1) { colaboradorEditando = null; return; }
+    const antigo = dados.colaboradores[idx].nome;
+    if (dados.colaboradores.some((c, j) => j !== idx && c.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Já existe colaborador com esse nome'); return; }
+    dados.colaboradores[idx].nome = nome;
+    dados.colaboradores[idx].funcao = funcao;
+    if (antigo !== nome) {
+      dados.equipes.forEach(e => { e.membros = e.membros.map(m => m === antigo ? nome : m); });
+      dados.apontamentos.forEach(a => { if (a.colaborador === antigo) a.colaborador = nome; });
+      dados.ferramentas.forEach(f => { if (f.colaborador === antigo) f.colaborador = nome; });
+    }
+    colaboradorEditando = null;
+  } else {
+    if (dados.colaboradores.some(c => c.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Colaborador já cadastrado'); return; }
+    dados.colaboradores.push({ nome: nome, funcao: funcao });
+  }
+  salvar();
+  document.getElementById('c_nome').value = '';
+  preencherSelectsColaboradores();
+  renderColaboradores();
+  toast('✅ Colaborador salvo!');
+}
+
+function renderColaboradores() {
+  let html = '<thead><tr><th>Nome</th><th>Função</th><th>Ações</th></tr></thead><tbody>';
+  dados.colaboradores.forEach((c, i) => {
+    html += '<tr><td><b>' + c.nome + '</b></td><td>' + c.funcao + '</td>' +
+      '<td><div class="actions-cell"><button class="btn small" onclick="editarColaborador(' + i + ')">✏️</button>' +
+      '<button class="btn small danger" onclick="excluirColaborador(' + i + ')">🗑️</button></div></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaColaboradores').innerHTML = html;
+}
+
+function editarColaborador(i) {
+  const c = dados.colaboradores[i];
+  colaboradorEditando = c.nome;
+  document.getElementById('c_nome').value = c.nome;
+  document.getElementById('c_funcao').value = c.funcao;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando colaborador "' + c.nome + '". Ajuste e salve.');
+}
+
+function excluirColaborador(i) {
+  if (confirm('Excluir este colaborador?')) {
+    const nome = dados.colaboradores[i].nome;
+    dados.colaboradores.splice(i, 1);
+    dados.equipes.forEach(e => { e.membros = e.membros.filter(m => m !== nome); });
+    salvar();
+    preencherSelectsColaboradores();
+    renderColaboradores();
+    toast('🗑️ Colaborador excluído.');
+  }
+}
+
+function adicionarMembroEquipe(nome) {
+  const container = document.getElementById('eMembrosContainer');
+  const div = document.createElement('div');
+  div.className = 'mo-item';
+  div.innerHTML = '<label>Colaborador</label>' +
+    '<select class="em-membro">' + dados.colaboradores.map(c => '<option ' + (c.nome === nome ? 'selected' : '') + '>' + c.nome + '</option>').join('') + '</select>' +
+    '<button class="btn small danger" onclick="removerMembroEquipe(this)" style="margin-top:6px">✕ Remover</button>';
+  container.appendChild(div);
+}
+
+function removerMembroEquipe(btn) { btn.closest('.mo-item').remove(); }
+// ===== EQUIPES =====
+let equipeEditando = null;
+let alocEditando = null;
+
+function obraTemVerba(obraNome) {
+  const o = dados.obras.find(x => x.nome === obraNome);
+  if (!o) return false;
+  return (o.servicos || []).some(s => (s.verbaMO || 0) > 0 || (s.diasExecucao || 0) > 0);
+}
+
+function gerarApontamentosAuto(aloc) {
+  const eq = dados.equipes.find(e => e.nome === aloc.equipe);
+  if (!eq || !eq.membros) return;
+  const ini = new Date(aloc.inicio + 'T00:00:00');
+  const fim = new Date(aloc.fim + 'T00:00:00');
+  for (let d = new Date(ini); d <= fim; d.setDate(d.getDate() + 1)) {
+    const dia = d.getDay();
+    if (dia === 0 || dia === 6) continue;
+    const ds = fmtDataLocal(d);
+    eq.membros.forEach(m => {
+      if (dados.apontamentos.some(a => a.alocId === aloc.id && a.data === ds && a.colaborador === m)) return;
+      const c = dados.colaboradores.find(x => x.nome === m);
+      dados.apontamentos.push({
+        data: ds, obra: aloc.obra, colaborador: m,
+        funcao: c ? c.funcao : '', horas: DIA_PADRAO,
+        servico: aloc.servico || '', tarefa: aloc.tarefa || '', obs: aloc.obs || '',
+        origem: 'auto', alocId: aloc.id, situacao: 'Trabalhado'
+      });
+    });
+  }
+}
+
+function removerApontamentosAutoFuturos(alocId) {
+  const h = hoje();
+  dados.apontamentos = dados.apontamentos.filter(a => !(a.alocId === alocId && a.origem === 'auto' && a.data >= h));
+}
+
+function preencherSelectsEquipes() {
+  const eqs = dados.equipes.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  document.getElementById('p_equipe').innerHTML = eqs.map(e => '<option>' + e.nome + '</option>').join('');
+  document.getElementById('p_obra').innerHTML = dados.obras.map(o => '<option>' + o.nome + '</option>').join('');
+  preencherServicosAlocacao();
+  const filtro = document.getElementById('filtroSemana');
+  const h = new Date();
+  let op = '';
+  for (let i = 0; i < 3; i++) {
+    const ini = new Date(h);
+    ini.setDate(h.getDate() - h.getDay() + 1 + i * 7);
+    const fim = new Date(ini);
+    fim.setDate(ini.getDate() + 6);
+    const label = 'Semana ' + (i === 0 ? 'atual' : '+' + i) + ': ' +
+      fmtData(fmtDataLocal(ini)) + ' a ' + fmtData(fmtDataLocal(fim));
+    op += '<option value="' + i + '">' + label + '</option>';
+  }
+  filtro.innerHTML = op;
+}
+
+function preencherServicosAlocacao() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('p_obra').value);
+  const servicos = obra && obra.servicos ? obra.servicos : [];
+  document.getElementById('p_servico').innerHTML =
+    '<option value="">(Deixar em branco: sem serviço)</option>' +
+    servicos.map(s => '<option value="' + s.tipo + '">' + s.tipo + '</option>').join('');
+  preencherTarefasAlocacao();
+}
+
+function preencherTarefasAlocacao() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('p_obra').value);
+  const serv = obra && obra.servicos ? obra.servicos.find(s => s.tipo === document.getElementById('p_servico').value) : null;
+  const tarefas = serv && serv.tarefas ? serv.tarefas : [];
+  document.getElementById('p_tarefa').innerHTML =
+    '<option value="">(Sem tarefa)</option>' +
+    tarefas.map(t => '<option value="' + t.descricao + '">' + t.descricao + '</option>').join('');
+}
+
+function salvarEquipe() {
+  const nome = document.getElementById('e_nome').value.trim();
+  if (!nome) { toast('⚠️ Informe o nome da equipe'); return; }
+  const membros = [...document.querySelectorAll('#eMembrosContainer .mo-item')].map(i => i.querySelector('.em-membro').value);
+  if (!membros.length) { toast('⚠️ Adicione pelo menos um colaborador à equipe'); return; }
+  if (dados.equipes.some(x => x.nome !== equipeEditando && x.nome.toLowerCase() === nome.toLowerCase())) {
+    toast('⚠️ Já existe equipe com esse nome'); return;
+  }
+  if (equipeEditando) {
+    const e = dados.equipes.find(x => x.nome === equipeEditando);
+    if (e) {
+      const antigo = e.nome;
+      e.nome = nome;
+      e.membros = membros;
+      if (antigo !== nome) dados.alocacoes.forEach(a => { if (a.equipe === antigo) a.equipe = nome; });
+    }
+    equipeEditando = null;
+  } else {
+    dados.equipes.push({ nome: nome, membros: membros });
+  }
+  dados.equipes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  salvar();
+  document.getElementById('e_nome').value = '';
+  document.getElementById('eMembrosContainer').innerHTML = '';
+  preencherSelectsEquipes();
+  renderEquipes();
+  toast('✅ Equipe salva!');
+}
+
+function editarEquipe(nome) {
+  const e = dados.equipes.find(x => x.nome === nome);
+  if (!e) return;
+  equipeEditando = e.nome;
+  document.getElementById('e_nome').value = e.nome;
+  document.getElementById('eMembrosContainer').innerHTML = '';
+  (e.membros || []).forEach(m => adicionarMembroEquipe(m));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando equipe "' + e.nome + '". Ajuste e salve.');
+}
+
+function excluirEquipe(nome) {
+  if (confirm('Excluir esta equipe?')) {
+    dados.equipes = dados.equipes.filter(e => e.nome !== nome);
+    dados.alocacoes = dados.alocacoes.filter(a => a.equipe !== nome);
+    salvar();
+    preencherSelectsEquipes();
+    renderEquipes();
+    toast('🗑️ Equipe excluída.');
+  }
+}
+
+function renderEquipes() {
+  const idxSem = parseInt(document.getElementById('filtroSemana').value || '0');
+  const h = new Date();
+  const ini = new Date(h);
+  ini.setDate(h.getDate() - h.getDay() + 1 + idxSem * 7);
+  const fim = new Date(ini);
+  fim.setDate(ini.getDate() + 6);
+  const iniStr = fmtDataLocal(ini);
+  const fimStr = fmtDataLocal(fim);
+
+  let html = '';
+  dados.equipes.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(e => {
+    const membros = e.membros && e.membros.length ? e.membros.join(' + ') : '—';
+    const alocs = dados.alocacoes.filter(a => a.equipe === e.nome).sort((a, b) => a.inicio.localeCompare(b.inicio));
+    const naSemana = alocs.filter(a => !a.concluida && a.inicio <= fimStr && a.fim >= iniStr);
+    const prox = alocs.find(a => !a.concluida && a.inicio > fimStr);
+    html += '<div class="semana-card"><h4>👷 ' + e.nome +
+      ' <button class="btn small" onclick="editarEquipe(\'' + e.nome + '\')">✏️</button>' +
+      ' <button class="btn small danger" onclick="excluirEquipe(\'' + e.nome + '\')">🗑️</button></h4>' +
+      '<div class="membros">' + membros + '</div>';
+    if (naSemana.length) {
+      naSemana.forEach(a => {
+        const semVerba = !obraTemVerba(a.obra);
+        html += '<div class="aloc atual"><div class="obra">📍 ' + a.obra + '</div>' +
+          '<div class="periodo">' + fmtData(a.inicio) + ' a ' + fmtData(a.fim) + '</div>' +
+          '<div class="periodo">' + (a.servico ? '🔧 ' + a.servico + (a.tarefa ? ' — ' + a.tarefa : '') : '🔧 Serviço não definido') + '</div>' +
+          (semVerba ? '<div class="periodo" style="color:#b45309;font-weight:600">⚠️ Obra sem verba MO cadastrada nos serviços</div>' : '') +
+          '<div class="actions-cell">' +
+          '<button class="btn small" onclick="editarAlocacao(\'' + a.equipe + '\',\'' + a.obra + '\',\'' + a.inicio + '\')">✏️</button>' +
+          '<button class="btn small green" onclick="concluirAlocacao(\'' + a.equipe + '\',\'' + a.obra + '\',\'' + a.inicio + '\')" title="Concluir esta obra (sai da programação)">✅</button>' +
+          '<button class="btn small danger" onclick="excluirAlocacao(\'' + a.equipe + '\',\'' + a.obra + '\',\'' + a.inicio + '\')">✕</button>' +
+          '</div></div>';
+      });
+    } else {
+      html += '<div class="aloc atual"><div class="obra">📍 Sem alocação nesta semana</div></div>';
+    }
+    if (prox) html += '<div class="aloc proxima"><div class="obra">➡️ ' + prox.obra + '</div><div class="periodo">' + fmtData(prox.inicio) + ' a ' + fmtData(prox.fim) + '</div></div>';
+    html += '</div>';
+  });
+  document.getElementById('gridEquipes').innerHTML = html || '<p style="color:#6b7280">Nenhuma equipe cadastrada.</p>';
+}
+
+function salvarAlocacao() {
+  const equipe = document.getElementById('p_equipe').value;
+  const obra = document.getElementById('p_obra').value;
+  const inicio = document.getElementById('p_inicio').value;
+  const fim = document.getElementById('p_fim').value;
+  const obs = document.getElementById('p_obs').value.trim();
+  const servico = document.getElementById('p_servico').value;
+  const tarefa = document.getElementById('p_tarefa').value;
+  if (!equipe || !obra || !inicio || !fim) { toast('⚠️ Preencha equipe, obra, início e fim'); return; }
+  if (fim < inicio) { toast('⚠️ A data fim deve ser após a data início'); return; }
+
+  const conf = dados.alocacoes.filter(a => a.id !== alocEditando && !a.concluida && a.equipe === equipe && a.obra !== obra && a.inicio <= fim && a.fim >= inicio);
+  if (conf.length) {
+    const det = conf.map(c => '📍 ' + c.obra + ' (' + fmtData(c.inicio) + ' a ' + fmtData(c.fim) + ')').join('\n');
+    if (!confirm('⚠️ ALERTA: a equipe ' + equipe + ' já está alocada em outra obra no mesmo período:\n\n' + det + '\n\nDeseja mesmo assim alocar em ' + obra + ' (' + fmtData(inicio) + ' a ' + fmtData(fim) + ')?')) return;
+  }
+
+  if (alocEditando) {
+    const i = dados.alocacoes.findIndex(a => a.id === alocEditando);
+    if (i > -1) {
+      const a = dados.alocacoes[i];
+      removerApontamentosAutoFuturos(a.id);
+      a.equipe = equipe; a.obra = obra; a.inicio = inicio; a.fim = fim; a.obs = obs;
+      a.servico = servico; a.tarefa = tarefa;
+      gerarApontamentosAuto(a);
+    }
+    alocEditando = null;
+  } else {
+    const aloc = { id: gerarId(), equipe: equipe, obra: obra, inicio: inicio, fim: fim, obs: obs, servico: servico, tarefa: tarefa, concluida: false };
+    dados.alocacoes.push(aloc);
+    gerarApontamentosAuto(aloc);
+  }
+  salvar();
+  document.getElementById('p_obs').value = '';
+  preencherSelectsEquipes();
+  renderEquipes();
+  toast('✅ Alocação programada!');
+}
+
+function editarAlocacao(equipe, obra, inicio) {
+  const a = dados.alocacoes.find(x => x.equipe === equipe && x.obra === obra && x.inicio === inicio);
+  if (!a) return;
+  alocEditando = a.id;
+  document.getElementById('p_equipe').value = a.equipe;
+  document.getElementById('p_obra').value = a.obra;
+  preencherServicosAlocacao();
+  document.getElementById('p_servico').value = a.servico || '';
+  preencherTarefasAlocacao();
+  document.getElementById('p_tarefa').value = a.tarefa || '';
+  document.getElementById('p_inicio').value = a.inicio;
+  document.getElementById('p_fim').value = a.fim;
+  document.getElementById('p_obs').value = a.obs || '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando alocação. Ajuste e salve.');
+}
+
+function excluirAlocacao(equipe, obra, inicio) {
+  if (confirm('Excluir esta alocação?')) {
+    const i = dados.alocacoes.findIndex(a => a.equipe === equipe && a.obra === obra && a.inicio === inicio);
+    if (i > -1) {
+      removerApontamentosAutoFuturos(dados.alocacoes[i].id);
+      dados.alocacoes.splice(i, 1);
+      salvar();
+      renderEquipes();
+      toast('🗑️ Alocação excluída.');
+    }
+  }
+}
+
+function concluirAlocacao(equipe, obra, inicio) {
+  const a = dados.alocacoes.find(x => x.equipe === equipe && x.obra === obra && x.inicio === inicio);
+  if (!a) return;
+  if (!confirm('Concluir a alocação da ' + equipe + ' em ' + obra + '?\n\nA obra sairá da programação semanal e os apontamentos automáticos futuros desta alocação serão removidos. O registro continua salvo (marcado como concluído).')) return;
+  a.concluida = true;
+  removerApontamentosAutoFuturos(a.id);
+  salvar();
+  renderEquipes();
+  toast('✅ ' + obra + ' concluída e removida da programação.');
+}
+
+// ===== PROGRAMAÇÃO PARA WHATSAPP (agrupada por equipe + ordenada por data) =====
+function resumoProgramacaoSemana() {
+  const idxSem = parseInt(document.getElementById('filtroSemana').value || '0');
+  const h = new Date();
+  const ini = new Date(h);
+  ini.setDate(h.getDate() - h.getDay() + 1 + idxSem * 7);
+  const fim = new Date(ini);
+  fim.setDate(ini.getDate() + 6);
+  const iniStr = fmtDataLocal(ini);
+  const fimStr = fmtDataLocal(fim);
+  const linhas = [];
+  dados.equipes.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(e => {
+    const membros = e.membros && e.membros.length ? e.membros.join(' + ') : '—';
+    const alocs = dados.alocacoes.filter(x => !x.concluida && x.equipe === e.nome && x.inicio <= fimStr && x.fim >= iniStr);
+    if (alocs.length) {
+      alocs.forEach(a => {
+        linhas.push({
+          equipe: e.nome, membros: membros, obra: a.obra,
+          servico: a.servico || '', tarefa: a.tarefa || '', obs: a.obs || '',
+          inicio: a.inicio, fim: a.fim,
+          periodo: fmtData(a.inicio) + ' a ' + fmtData(a.fim)
+        });
+      });
+    } else {
+      linhas.push({ equipe: e.nome, membros: membros, obra: '', servico: '', tarefa: '', obs: '', inicio: '', fim: '', periodo: '' });
+    }
+  });
+  return { ini: iniStr, fim: fimStr, linhas: linhas };
+}
+
+function copiarProgramacaoWhatsApp() {
+  const r = resumoProgramacaoSemana();
+  let txt = '🗓️ *PROGRAMAÇÃO SEMANAL*\n';
+  txt += '📅 ' + fmtData(r.ini) + ' a ' + fmtData(r.fim) + '\n';
+  txt += '🏗️ Joule Engenharia\n\n';
+
+  const porEquipe = {};
+  r.linhas.forEach(l => {
+    if (!porEquipe[l.equipe]) porEquipe[l.equipe] = { membros: l.membros, obras: [] };
+    if (l.obra) porEquipe[l.equipe].obras.push(l);
+  });
+
+  Object.keys(porEquipe).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(nome => {
+    const eq = porEquipe[nome];
+    txt += '👷 *' + nome + '* (' + eq.membros + ')\n';
+    if (eq.obras.length) {
+      eq.obras.sort((a, b) => a.inicio.localeCompare(b.inicio) || a.fim.localeCompare(b.fim));
+      eq.obras.forEach(l => {
+        txt += '📍 ' + l.obra + '\n';
+        txt += '📆 ' + l.periodo + '\n';
+        if (l.servico) txt += '🔧 Serviço: ' + l.servico + (l.tarefa ? '\n📌 Tarefa: ' + l.tarefa : '') + '\n';
+        if (l.obs) txt += '📝 ' + l.obs + '\n';
+      });
+    } else {
+      txt += '➖ Sem alocação nesta semana\n';
+    }
+    txt += '\n';
+  });
+
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('✅ Programação copiada! Cole no WhatsApp.'); }
+    catch (e) { toast('⚠️ Não foi possível copiar. Selecione o texto manualmente.'); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => toast('✅ Programação copiada! Cole no WhatsApp.')).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+
+function gerarImagemProgramacao() {
+  const r = resumoProgramacaoSemana();
+  const linhas = r.linhas;
+  const W = 1080;
+  const cabH = 150;
+  const linH = 80;
+  const H = cabH + linhas.length * linH + 60;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#f0f2f5';
+  ctx.fillRect(0, 0, W, H);
+
+  const grad = ctx.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, '#0f3460');
+  grad.addColorStop(1, '#16213e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, cabH);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 42px Arial';
+  ctx.fillText('PROGRAMAÇÃO SEMANAL', W / 2, 64);
+  ctx.font = '26px Arial';
+  ctx.fillStyle = '#cfd8e3';
+  ctx.fillText(fmtData(r.ini) + ' a ' + fmtData(r.fim) + '  •  Joule Engenharia', W / 2, 108);
+
+  let y = cabH;
+  linhas.forEach((l, i) => {
+    ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#eef2f7';
+    ctx.fillRect(0, y, W, linH);
+    ctx.strokeStyle = '#d1d5db';
+    ctx.beginPath();
+    ctx.moveTo(0, y + linH);
+    ctx.lineTo(W, y + linH);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f3460';
+    ctx.font = 'bold 27px Arial';
+    ctx.fillText('👷 ' + l.equipe, 40, y + 42);
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '20px Arial';
+    ctx.fillText(l.membros, 40, y + 70);
+
+    if (l.obra) {
+      ctx.fillStyle = '#0f3460';
+      ctx.font = '24px Arial';
+      ctx.fillText('📍 ' + l.obra, 430, y + 40);
+      ctx.fillStyle = '#374151';
+      ctx.font = '20px Arial';
+      let sub = '📆 ' + l.periodo;
+      if (l.servico) sub += '  •  🔧 ' + l.servico;
+      if (l.tarefa) sub += ' — ' + l.tarefa;
+      const arr = Array.from(sub);
+      ctx.fillText(arr.length > 58 ? arr.slice(0, 57).join('') + '…' : sub, 430, y + 66);
+    } else {
+      ctx.fillStyle = '#b45309';
+      ctx.font = '24px Arial';
+      ctx.fillText('➖ Sem alocação nesta semana', 430, y + 48);
+    }
+    y += linH;
+  });
+
+  const a = document.createElement('a');
+  a.download = 'programacao_semanal.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  toast('🖼️ Imagem gerada! Envie no WhatsApp.');
+}
+
+// ===== EVOLUÇÃO FÍSICA DA OBRA =====
+function preencherFiltroEvolucao() {
+  document.getElementById('filtroEvolObra').innerHTML = '<option value="">Todas as obras</option>' +
+    dados.obras.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(o => '<option>' + o.nome + '</option>').join('');
+}
+
+function parseQuantidade(unidade) {
+  if (!unidade) return 0;
+  const m = String(unidade).match(/([\d.,]+)/);
+  if (!m) return 0;
+  return parseFloat(m[1].replace(',', '.')) || 0;
+}
+
+function salvarExecutado(obraNome, servicoTipo, tarefaDesc, valor) {
+  const obra = dados.obras.find(o => o.nome === obraNome);
+  if (!obra) return;
+  const servico = (obra.servicos || []).find(s => s.tipo === servicoTipo);
+  if (!servico) return;
+  const tarefa = (servico.tarefas || []).find(t => t.descricao === tarefaDesc);
+  if (!tarefa) return;
+  tarefa.executado = parseFloat(String(valor).replace(',', '.')) || 0;
+  salvar();
+  renderEvolucao();
+  toast('✅ Quantidade executada salva!');
+}
+
+function renderEvolucao() {
+  const filtro = document.getElementById('filtroEvolObra').value;
+  const h = hoje();
+  let obras = dados.obras.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  if (filtro) obras = obras.filter(o => o.nome === filtro);
+
+  let totTarefas = 0, totIniciadas = 0, totHoras = 0, somaPct = 0, obrasServ = 0;
+  let html = '';
+  obras.forEach(o => {
+    const servicos = o.servicos || [];
+    if (!servicos.some(s => (s.tarefas || []).length > 0)) return;
+    obrasServ++;
+    let tarefas = 0, iniciadas = 0, horas = 0, somaPlan = 0, somaExec = 0;
+    let tab = '<thead><tr><th>Serviço</th><th>Tarefa</th><th>Unidade Planejada</th><th>Qtd. Executada</th><th>% Progresso</th><th>Status</th></tr></thead><tbody>';
+    servicos.forEach(s => {
+      (s.tarefas || []).forEach(t => {
+        tarefas++;
+        const plan = parseQuantidade(t.unidade);
+        const ap = dados.apontamentos.filter(a => a.obra === o.nome && a.servico === s.tipo && a.tarefa === t.descricao && !(a.origem === 'auto' && a.data > h) && a.situacao !== 'Falta' && a.situacao !== 'BH');
+        const hh = ap.reduce((sum, a) => sum + a.horas, 0);
+        horas += hh;
+        let exec = (t.executado !== undefined && t.executado !== null && t.executado !== '') ? parseFloat(t.executado) : 0;
+        const unid = (t.unidade || '').toLowerCase();
+        if (exec === 0 && unid.indexOf('dia') > -1 && hh > 0) exec = hh / DIA_PADRAO / 2;
+        somaPlan += plan;
+        somaExec += exec;
+        const pct = plan > 0 ? Math.min(100, (exec / plan) * 100) : 0;
+        if (exec > 0) iniciadas++;
+        const cor = pct >= 100 ? '#16a34a' : pct > 0 ? '#ea580c' : '#e5e7eb';
+        const st = pct >= 100 ? '<span class="badge ok">Concluída</span>' : pct > 0 ? '<span class="badge info">Em andamento</span>' : '<span class="badge neutral">Não iniciada</span>';
+        tab += '<tr><td><b>' + s.tipo + '</b></td><td>' + t.descricao + '</td><td>' + (t.unidade || '—') + '</td>' +
+          '<td><input type="number" step="0.01" min="0" style="width:90px;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" value="' + exec + '" onchange="salvarExecutado(\'' + o.nome + '\',\'' + s.tipo + '\',\'' + t.descricao + '\',this.value)"></td>' +
+          '<td><div class="progress"><div style="width:' + pct + '%;background:' + cor + '"></div></div> ' + pct.toFixed(0) + '%</td>' +
+          '<td>' + st + '</td></tr>';
+      });
+    });
+    tab += '</tbody>';
+    totTarefas += tarefas;
+    totIniciadas += iniciadas;
+    totHoras += horas;
+    const pctF = somaPlan > 0 ? (somaExec / somaPlan) * 100 : 0;
+    somaPct += pctF;
+    const corF = pctF >= 100 ? '#16a34a' : pctF > 0 ? '#ea580c' : '#e5e7eb';
+    const stF = pctF >= 100 ? '<span class="badge ok">Concluída</span>' : pctF > 0 ? '<span class="badge info">Em andamento</span>' : '<span class="badge neutral">Não iniciada</span>';
+    html += '<div class="panel"><h2>🏢 ' + o.nome +
+      ' <span class="badge info">' + iniciadas + '/' + tarefas + ' tarefas iniciadas</span>' +
+      ' <span class="badge neutral">' + fmtNum2(horas) + 'h apontadas</span></h2>' +
+      '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+      '<strong>📊 % Físico Total da Obra:</strong><span>' + pctF.toFixed(1) + '% ' + stF + '</span></div>' +
+      '<div class="progress" style="height:14px"><div style="width:' + Math.min(100, pctF) + '%;background:' + corF + '"></div></div></div>' +
+      '<div style="overflow-x:auto"><table>' + tab + '</table></div></div>';
+  });
+
+  const pctMedio = obrasServ > 0 ? somaPct / obrasServ : 0;
+  document.getElementById('cardsEvolucao').innerHTML =
+    '<div class="card"><div class="label">Obras com Tarefas</div><div class="value blue">' + obrasServ + '</div></div>' +
+    '<div class="card"><div class="label">Tarefas Planejadas</div><div class="value blue">' + totTarefas + '</div></div>' +
+    '<div class="card"><div class="label">Tarefas Iniciadas</div><div class="value green">' + totIniciadas + '</div></div>' +
+    '<div class="card"><div class="label">Horas Apontadas</div><div class="value orange">' + fmtNum2(totHoras) + '</div></div>' +
+    '<div class="card"><div class="label">% Físico Médio</div><div class="value blue">' + pctMedio.toFixed(1) + '%</div></div>';
+  document.getElementById('evolucaoContainer').innerHTML = html || '<p style="color:#6b7280">Nenhuma tarefa cadastrada nos serviços das obras. Edite uma obra e adicione tarefas aos serviços.</p>';
+}
+
+// ===== RELATÓRIO SEMANAL =====
+function imprimirProgramacaoSemanal() {
+  const idxSem = parseInt(document.getElementById('filtroSemana').value || '0');
+  const h = new Date();
+  const ini = new Date(h);
+  ini.setDate(h.getDate() - h.getDay() + 1 + idxSem * 7);
+  const fim = new Date(ini);
+  fim.setDate(ini.getDate() + 6);
+  const iniStr = fmtDataLocal(ini);
+  const fimStr = fmtDataLocal(fim);
+
+  let linhas = '';
+  dados.equipes.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(e => {
+    const membros = e.membros && e.membros.length ? e.membros.join(' + ') : '—';
+    const alocs = dados.alocacoes.filter(a => a.equipe === e.nome && !a.concluida);
+    const naSemana = alocs.filter(a => a.inicio <= fimStr && a.fim >= iniStr);
+    const prox = alocs.find(a => a.inicio > fimStr);
+    const atual = naSemana.length ? naSemana.map(a => a.obra + (a.servico ? ' [' + a.servico + (a.tarefa ? ' - ' + a.tarefa : '') + ']' : '') + ' (' + fmtData(a.inicio) + ' a ' + fmtData(a.fim) + ')').join('; ') : '—';
+    const pr = prox ? prox.obra + ' (' + fmtData(prox.inicio) + ' a ' + fmtData(prox.fim) + ')' : '—';
+    linhas += '<tr><td><b>' + e.nome + '</b></td><td>' + membros + '</td><td>' + atual + '</td><td>' + pr + '</td></tr>';
+  });
+
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Programação Semanal</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif}body{margin:24px}h1{font-size:20px;color:#0f3460;margin-bottom:4px}.sub{font-size:12px;color:#6b7280;margin-bottom:14px}.periodo{font-size:14px;font-weight:600;margin-bottom:16px;padding:8px 12px;background:#e0e7ff;border-radius:6px;display:inline-block}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#0f3460;color:#fff;text-align:left;padding:8px 10px}td{padding:8px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top}tr:nth-child(even) td{background:#f8fafc}.rodape{margin-top:20px;font-size:11px;color:#6b7280}@media print{body{margin:12mm}}</style></head><body><h1>🏗️ Programação Semanal de Equipes</h1><div class="sub">Joule Engenharia | Gestão de Obras</div><div class="periodo">📅 ' + fmtData(iniStr) + ' a ' + fmtData(fimStr) + '</div><table><thead><tr><th style="width:90px">Equipe</th><th>Colaboradores</th><th>Alocação na Semana</th><th>Próxima Alocação</th></tr></thead><tbody>' + linhas + '</tbody></table><div class="rodape">Gerado em ' + new Date().toLocaleDateString('pt-BR') + '</div><script>window.print();<\/script></body></html>');
+  janela.document.close();
+}
+
+// ===== EXPORTAR / LIMPAR =====
+function exportarDados() {
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gestao_obras_joule_dados.json';
+  a.click();
+  toast('📥 Dados exportados!');
+}
+
+function limparDados() {
+  if (confirm('Apagar todos os dados salvos e restaurar os dados de exemplo?')) {
+    localStorage.removeItem('gestao_obras_joule_v4');
+    dados = JSON.parse(JSON.stringify(dadosIniciais));
+    salvar();
+    mudarAba('visao');
+    toast('🗑️ Dados restaurados.');
+  }
+}
+// ===== EMPREITEIROS =====
+let empreiteiroEditando = null;
+let contratoEditando = null;
+
+function preencherSelectsEmpreiteiros() {
+  const emps = dados.empreiteiros.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  document.getElementById('c_empreiteiro').innerHTML = emps.map(e => '<option>' + e.nome + '</option>').join('');
+  document.getElementById('c_obra').innerHTML = dados.obras.map(o => '<option>' + o.nome + '</option>').join('');
+  preencherServicosContrato();
+  preencherSelectMedicao();
+}
+
+function salvarEmpreiteiro() {
+  const nome = document.getElementById('emp_nome').value.trim();
+  if (!nome) { toast('⚠️ Informe o nome do empreiteiro'); return; }
+  if (dados.empreiteiros.some(e => e.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Empreiteiro já cadastrado'); return; }
+  dados.empreiteiros.push({ nome: nome });
+  salvar();
+  document.getElementById('emp_nome').value = '';
+  preencherSelectsEmpreiteiros();
+  renderEmpreiteiros();
+  toast('✅ Empreiteiro cadastrado!');
+}
+
+function renderEmpreiteiros() {
+  let html = '<thead><tr><th>Nome</th><th>Contratos</th><th>Total Contratado</th><th>Total Medido</th><th>Saldo</th><th>Ações</th></tr></thead><tbody>';
+  dados.empreiteiros.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(e => {
+    const contratos = dados.contratosEmpreiteiro.filter(c => c.empreiteiro === e.nome);
+    const totalContrato = contratos.reduce((s, c) => s + (c.valorContrato || 0), 0);
+    const totalMedido = contratos.reduce((s, c) => s + (c.medicoes || []).reduce((m, x) => m + (x.valor || 0), 0), 0);
+    const idx = dados.empreiteiros.indexOf(e);
+    html += '<tr><td><b>' + e.nome + '</b></td><td>' + contratos.length + '</td>' +
+      '<td>' + fmtMoeda(totalContrato) + '</td><td>' + fmtMoeda(totalMedido) + '</td>' +
+      '<td>' + fmtMoeda(totalContrato - totalMedido) + '</td>' +
+      '<td><button class="btn small danger" onclick="excluirEmpreiteiro(' + idx + ')">🗑️</button></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaEmpreiteiros').innerHTML = html;
+}
+
+function excluirEmpreiteiro(i) {
+  const nome = dados.empreiteiros[i].nome;
+  if (confirm('Excluir o empreiteiro ' + nome + '? Os contratos dele também serão removidos.')) {
+    dados.empreiteiros.splice(i, 1);
+    dados.contratosEmpreiteiro = dados.contratosEmpreiteiro.filter(c => c.empreiteiro !== nome);
+    salvar();
+    preencherSelectsEmpreiteiros();
+    renderEmpreiteiros();
+    renderContratosEmpreiteiro();
+    renderResumoEmpreiteiros();
+    toast('🗑️ Empreiteiro excluído.');
+  }
+}
+
+function preencherServicosContrato() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('c_obra').value);
+  const servicos = obra && obra.servicos ? obra.servicos : [];
+  document.getElementById('c_servico').innerHTML = '<option value="">Selecione o serviço...</option>' + servicos.map(s => '<option>' + s.tipo + '</option>').join('');
+  preencherTarefasContrato();
+  atualizarVerbaInfoContrato();
+}
+
+function preencherTarefasContrato() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('c_obra').value);
+  const servico = obra && obra.servicos ? obra.servicos.find(s => s.tipo === document.getElementById('c_servico').value) : null;
+  const tarefas = servico && servico.tarefas ? servico.tarefas : [];
+  document.getElementById('c_tarefa').innerHTML = '<option value="">Todas / Geral</option>' + tarefas.map(t => '<option value="' + t.descricao + '">' + t.descricao + '</option>').join('');
+  atualizarVerbaInfoContrato();
+}
+
+function atualizarVerbaInfoContrato() {
+  const obra = dados.obras.find(o => o.nome === document.getElementById('c_obra').value);
+  const servico = obra && obra.servicos ? obra.servicos.find(s => s.tipo === document.getElementById('c_servico').value) : null;
+  const info = document.getElementById('c_verbaInfo');
+  if (!servico) { info.innerHTML = 'Selecione a obra e o serviço para ver a verba disponível.'; return; }
+  const taxa = taxaDiariaServico(servico);
+  const diasPropria = obra ? diasPropriaServico(obra, servico) : 0;
+  const verbaEmp = verbaEmpreiteiroServico(obra.nome, servico.tipo);
+  const verbaUsada = diasPropria * taxa + verbaEmp;
+  const verbaDisp = (servico.verbaMO || 0) - verbaUsada;
+  info.innerHTML = '💰 <b>Verba do serviço:</b> ' + fmtMoeda(servico.verbaMO) +
+    ' | <b>Já utilizada:</b> ' + fmtMoeda(verbaUsada) +
+    ' | <b>Disponível:</b> <span style="color:' + (verbaDisp < 0 ? '#dc2626' : '#16a34a') + ';font-weight:700">' + fmtMoeda(verbaDisp) + '</span>' +
+    ' | <b>Taxa:</b> ' + fmtMoeda(taxa) + '/dia';
+}
+
+function salvarContratoEmpreiteiro() {
+  const empreiteiro = document.getElementById('c_empreiteiro').value;
+  const obra = document.getElementById('c_obra').value;
+  const servico = document.getElementById('c_servico').value;
+  const tarefa = document.getElementById('c_tarefa').value;
+  const valor = parseFloat(String(document.getElementById('c_valor').value).replace(',', '.')) || 0;
+  if (!empreiteiro || !obra || !servico) { toast('⚠️ Preencha empreiteiro, obra e serviço'); return; }
+  if (valor <= 0) { toast('⚠️ Informe o valor do contrato'); return; }
+
+  const ob = dados.obras.find(o => o.nome === obra);
+  const s = ob && ob.servicos ? ob.servicos.find(x => x.tipo === servico) : null;
+  if (s) {
+    const verbaDisp = (s.verbaMO || 0) - (diasPropriaServico(ob, s) * taxaDiariaServico(s)) - verbaEmpreiteiroServico(obra, servico);
+    if (valor > verbaDisp) {
+      if (!confirm('⚠️ O valor do contrato (' + fmtMoeda(valor) + ') é maior que a verba disponível do serviço (' + fmtMoeda(verbaDisp) + ').\n\nDeseja mesmo assim salvar?')) return;
+    }
+  }
+
+  if (contratoEditando) {
+    const c = dados.contratosEmpreiteiro.find(x => x.id === contratoEditando);
+    if (c) {
+      c.empreiteiro = empreiteiro; c.obra = obra; c.servico = servico; c.tarefa = tarefa; c.valorContrato = valor;
+    }
+    contratoEditando = null;
+  } else {
+    dados.contratosEmpreiteiro.push({ id: gerarId(), empreiteiro: empreiteiro, obra: obra, servico: servico, tarefa: tarefa, valorContrato: valor, medicoes: [] });
+  }
+  salvar();
+  document.getElementById('c_valor').value = '';
+  preencherSelectsEmpreiteiros();
+  renderContratosEmpreiteiro();
+  renderEmpreiteiros();
+  renderResumoEmpreiteiros();
+  toast('✅ Contrato salvo!');
+}
+
+function renderContratosEmpreiteiro() {
+  let html = '<thead><tr><th>Empreiteiro</th><th>Obra</th><th>Serviço</th><th>Tarefa</th><th>Valor Contrato</th><th>Medido</th><th>Saldo</th><th>Ações</th></tr></thead><tbody>';
+  dados.contratosEmpreiteiro.forEach(c => {
+    const medido = (c.medicoes || []).reduce((s, x) => s + (x.valor || 0), 0);
+    const saldo = (c.valorContrato || 0) - medido;
+    html += '<tr><td><b>' + c.empreiteiro + '</b></td><td>' + c.obra + '</td><td>' + c.servico + '</td>' +
+      '<td>' + (c.tarefa || '—') + '</td><td>' + fmtMoeda(c.valorContrato) + '</td>' +
+      '<td>' + fmtMoeda(medido) + '</td><td>' + fmtMoeda(saldo) + '</td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn small" onclick="editarContratoEmpreiteiro(\'' + c.id + '\')">✏️</button>' +
+        '<button class="btn small danger" onclick="excluirContratoEmpreiteiro(\'' + c.id + '\')">🗑️</button>' +
+      '</div></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaContratosEmpreiteiro').innerHTML = html;
+}
+
+function editarContratoEmpreiteiro(id) {
+  const c = dados.contratosEmpreiteiro.find(x => x.id === id);
+  if (!c) return;
+  contratoEditando = id;
+  document.getElementById('c_empreiteiro').value = c.empreiteiro;
+  document.getElementById('c_obra').value = c.obra;
+  preencherServicosContrato();
+  document.getElementById('c_servico').value = c.servico;
+  preencherTarefasContrato();
+  document.getElementById('c_tarefa').value = c.tarefa || '';
+  document.getElementById('c_valor').value = c.valorContrato;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando contrato. Ajuste e salve.');
+}
+
+function excluirContratoEmpreiteiro(id) {
+  if (confirm('Excluir este contrato? As medições dele também serão removidas.')) {
+    dados.contratosEmpreiteiro = dados.contratosEmpreiteiro.filter(c => c.id !== id);
+    salvar();
+    preencherSelectsEmpreiteiros();
+    renderContratosEmpreiteiro();
+    renderEmpreiteiros();
+    renderResumoEmpreiteiros();
+    toast('🗑️ Contrato excluído.');
+  }
+}
+
+function preencherSelectMedicao() {
+  const sel = document.getElementById('m_contrato');
+  sel.innerHTML = dados.contratosEmpreiteiro.map((c, i) => '<option value="' + i + '">' + c.empreiteiro + ' - ' + c.obra + ' - ' + c.servico + '</option>').join('');
+  document.getElementById('m_data').value = hoje();
+}
+
+function salvarMedicao() {
+  const idx = parseInt(document.getElementById('m_contrato').value);
+  const data = document.getElementById('m_data').value;
+  const valor = parseFloat(String(document.getElementById('m_valor').value).replace(',', '.')) || 0;
+  const obs = document.getElementById('m_obs').value.trim();
+  if (isNaN(idx) || !dados.contratosEmpreiteiro[idx]) { toast('⚠️ Selecione um contrato'); return; }
+  if (!data) { toast('⚠️ Informe a data'); return; }
+  if (valor <= 0) { toast('⚠️ Informe o valor da medição'); return; }
+
+  const c = dados.contratosEmpreiteiro[idx];
+  const medido = (c.medicoes || []).reduce((s, x) => s + (x.valor || 0), 0);
+  if (medido + valor > (c.valorContrato || 0)) {
+    if (!confirm('⚠️ Esta medição (' + fmtMoeda(valor) + ') ultrapassa o saldo do contrato (' + fmtMoeda((c.valorContrato || 0) - medido) + ').\n\nDeseja mesmo assim registrar?')) return;
+  }
+  if (!c.medicoes) c.medicoes = [];
+  c.medicoes.push({ data: data, valor: valor, obs: obs });
+  salvar();
+  document.getElementById('m_valor').value = '';
+  document.getElementById('m_obs').value = '';
+  preencherSelectsEmpreiteiros();
+  renderContratosEmpreiteiro();
+  renderEmpreiteiros();
+  renderResumoEmpreiteiros();
+  toast('✅ Medição registrada! Verba e dias da obra atualizados.');
+}
+
+function renderResumoEmpreiteiros() {
+  let html = '<div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:0">' +
+    '<div class="card"><div class="label">Empreiteiros</div><div class="value blue">' + dados.empreiteiros.length + '</div></div>' +
+    '<div class="card"><div class="label">Contratos</div><div class="value blue">' + dados.contratosEmpreiteiro.length + '</div></div>' +
+    '<div class="card"><div class="label">Total Contratado</div><div class="value blue">' + fmtMoeda(dados.contratosEmpreiteiro.reduce((s, c) => s + (c.valorContrato || 0), 0)) + '</div></div>' +
+    '<div class="card"><div class="label">Total Medido</div><div class="value orange">' + fmtMoeda(dados.contratosEmpreiteiro.reduce((s, c) => s + (c.medicoes || []).reduce((m, x) => m + (x.valor || 0), 0), 0)) + '</div></div>' +
+    '<div class="card"><div class="label">Saldo a Pagar</div><div class="value green">' + fmtMoeda(dados.contratosEmpreiteiro.reduce((s, c) => s + ((c.valorContrato || 0) - (c.medicoes || []).reduce((m, x) => m + (x.valor || 0), 0)), 0)) + '</div></div>' +
+    '</div>';
+  document.getElementById('resumoEmpreiteiros').innerHTML = html;
+}
+
+// ===== REDES FRIGORÍGENAS =====
+let redeEditando = null;
+const BITOLAS1 = ['1/4"','3/8"','1/2"'];
+const BITOLAS2 = ['3/8"','1/2"','5/8"','3/4"','7/8"'];
+const BITOLAS_TOTAIS = ['1/4','3/8','1/2','5/8','3/4','7/8'];
+
+function opcoesBitola1(sel) { return BITOLAS1.map(b => '<option ' + (b === sel ? 'selected' : '') + '>' + b + '</option>').join(''); }
+function opcoesBitola2(sel) { return BITOLAS2.map(b => '<option ' + (b === sel ? 'selected' : '') + '>' + b + '</option>').join(''); }
+
+function formatarPavimento(pav) {
+  if (!pav) return '';
+  const p = String(pav).trim();
+  const m1 = p.match(/^(\d+)\s*(º|ª)?\s*$/);
+  if (m1) return m1[1] + 'ª Pavimento';
+  const m2 = p.match(/^(\d+)\s*(º|ª)?\s*(PAVIMENTO|PAV)/i);
+  if (m2) return m2[1] + 'ª Pavimento';
+  return p;
+}
+
+function ordemPavimentos(a, b) {
+  const ma = String(a).match(/(\d+)/), mb = String(b).match(/(\d+)/);
+  const na = ma ? parseInt(ma[1], 10) : Infinity;
+  const nb = mb ? parseInt(mb[1], 10) : Infinity;
+  if (na !== nb) return na - nb;
+  return String(a).localeCompare(String(b), 'pt-BR');
+}
+
+function statusRede(r) {
+  if (r.status === 'Concluída' || r.status === 'Fabricada' || r.status === 'Enviada') return 'Concluída';
+  if (r.status === 'Enviado para produção') return 'Enviado para produção';
+  return 'Pendente';
+}
+
+function statusPavimento(lista) {
+  const c = lista.filter(r => statusRede(r) === 'Concluída').length;
+  const e = lista.filter(r => statusRede(r) === 'Enviado para produção').length;
+  if (c === lista.length) return 'Concluído';
+  if (c + e === lista.length) return 'Em produção';
+  return 'Pendente';
+}
+
+function preencherSelectRedes() {
+  document.getElementById('redObra').innerHTML = dados.obras.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(o => '<option>' + o.nome + '</option>').join('');
+  carregarRedesObra();
+}
+
+function carregarRedesObra() { renderCardsRedes(); renderRelatorioPavimentos(); renderRedes(); }
+
+function redesDaObra() {
+  const obra = document.getElementById('redObra').value;
+  if (!obra) return [];
+  return dados.redes.filter(r => r.obra === obra);
+}
+
+function renderCardsRedes() {
+  const redes = redesDaObra();
+  const pavs = [...new Set(redes.map(r => r.pavimento))];
+  const conc = redes.filter(r => statusRede(r) === 'Concluída').length;
+  const env = redes.filter(r => statusRede(r) === 'Enviado para produção').length;
+  const pend = redes.length - conc - env;
+  let pavConc = 0, pavProd = 0;
+  pavs.forEach(p => {
+    const s = statusPavimento(redes.filter(r => r.pavimento === p));
+    if (s === 'Concluído') pavConc++; else if (s === 'Em produção') pavProd++;
+  });
+  document.getElementById('cardsRedes').innerHTML =
+    '<div class="card"><div class="label">Total de Redes</div><div class="value blue">' + redes.length + '</div></div>' +
+    '<div class="card"><div class="label">Redes Concluídas</div><div class="value green">' + conc + '</div></div>' +
+    '<div class="card"><div class="label">Em Produção</div><div class="value blue">' + env + '</div></div>' +
+    '<div class="card"><div class="label">Redes Pendentes</div><div class="value orange">' + pend + '</div></div>' +
+    '<div class="card"><div class="label">Pavimentos</div><div class="value blue">' + pavs.length + '</div></div>' +
+    '<div class="card"><div class="label">Pav. Concluídos</div><div class="value green">' + pavConc + '</div></div>' +
+    '<div class="card"><div class="label">Pav. Em Produção</div><div class="value blue">' + pavProd + '</div></div>' +
+    '<div class="card"><div class="label">Pav. Pendentes</div><div class="value orange">' + (pavs.length - pavConc - pavProd) + '</div></div>';
+}
+
+function renderRelatorioPavimentos() {
+  const filtro = document.getElementById('filtroPavStatus').value;
+  const redesAll = redesDaObra();
+  const porPav = {};
+  redesAll.forEach(r => {
+    if (!porPav[r.pavimento]) porPav[r.pavimento] = [];
+    porPav[r.pavimento].push(r);
+  });
+  const pavs = Object.keys(porPav).sort(ordemPavimentos);
+  let linhas = '', contados = 0;
+  pavs.forEach(p => {
+    const lista = porPav[p];
+    const st = statusPavimento(lista);
+    if (filtro && filtro !== st) return;
+    contados++;
+    const conc = lista.filter(r => statusRede(r) === 'Concluída').length;
+    const env = lista.filter(r => statusRede(r) === 'Enviado para produção').length;
+    const pend = lista.length - conc - env;
+    const ues = [...new Set(lista.map(r => r.ue))].join(', ');
+    const badge = st === 'Concluído' ? 'ok' : st === 'Em produção' ? 'info' : 'warn';
+    linhas += '<tr><td><b>' + p + '</b></td><td style="max-width:260px">' + ues + '</td>' +
+      '<td>' + lista.length + '</td><td>' + conc + '</td><td>' + pend + '</td>' +
+      '<td><span class="badge ' + badge + '">' + st + '</span></td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn small" onclick="imprimirEtiquetasPavimento(\'' + p + '\')">🏷️ Etiquetas</button>' +
+        '<button class="btn small green" onclick="imprimirControleSaidaPavimento(\'' + p + '\')">📦 Controle de Saída</button>' +
+        '<button class="btn small" onclick="imprimirListaMaterialPavimento(\'' + p + '\')">📋 Lista de Material</button>' +
+        '<button class="btn small" onclick="duplicarPavimento(\'' + p + '\')">📋 Duplicar andar</button>' +
+      '</div></td></tr>';
+  });
+  const cab = '<thead><tr><th>Pavimento</th><th>UEs / Finais</th><th>Total de Redes</th><th>Concluídas</th><th>Pendentes</th><th>Status</th><th>Ações</th></tr></thead>';
+  document.getElementById('tabelaPavimentos').innerHTML = contados ? cab + '<tbody>' + linhas + '</tbody>' : '<p style="color:#6b7280">Nenhum pavimento encontrado para este filtro.</p>';
+}
+
+function criarAmbienteBlock(ambiente, b1, b2, tamanho) {
+  const div = document.createElement('div');
+  div.className = 'mo-item';
+  div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+    '<strong style="font-size:13px">🌡️ Ambiente</strong><button class="btn small danger" onclick="removerAmbiente(this)">✕</button></div>' +
+    '<div class="form-grid">' +
+    '<div><label>Ambiente</label><input class="ra-ambiente" placeholder="Ex: Sala, Quarto 01" value="' + (ambiente || '') + '"></div>' +
+    '<div><label>Bitola 1 (Líquido)</label><select class="ra-bitola1">' + opcoesBitola1(b1) + '</select></div>' +
+    '<div><label>Bitola 2 (Sucção)</label><select class="ra-bitola2">' + opcoesBitola2(b2) + '</select></div>' +
+    '<div><label>Tamanho (m)</label><input class="ra-tamanho" type="number" step="0.1" min="0" placeholder="Ex: 15,5" value="' + (tamanho || '') + '"></div>' +
+    '</div>';
+  return div;
+}
+
+function adicionarUe(ue) {
+  const container = document.getElementById('rUesContainer');
+  const div = document.createElement('div');
+  div.className = 'servico-item';
+  div.innerHTML = '<div class="sv-head"><strong>🏠 Final / UE</strong><button class="btn small danger" onclick="removerUe(this)">✕ Remover UE</button></div>' +
+    '<div class="form-grid"><div><label>Final / UE</label><input class="ru-ue" placeholder="Ex: UE 01" value="' + (ue || '') + '"></div></div>' +
+    '<div class="ru-ambientes"></div><button class="btn small" onclick="adicionarAmbiente(this)">➕ Adicionar novo ambiente</button>';
+  container.appendChild(div);
+  div.querySelector('.ru-ambientes').appendChild(criarAmbienteBlock('', '3/8"', '5/8"', ''));
+}
+
+function removerUe(btn) { btn.closest('.servico-item').remove(); }
+function adicionarAmbiente(btn) { btn.closest('.servico-item').querySelector('.ru-ambientes').appendChild(criarAmbienteBlock('', '3/8"', '5/8"', '')); }
+function removerAmbiente(btn) { btn.closest('.mo-item').remove(); }
+
+function salvarRedes() {
+  const obra = document.getElementById('redObra').value;
+  const pavimento = document.getElementById('r_pavimento').value.trim();
+  if (!obra || !pavimento) { toast('⚠️ Informe a obra e o pavimento'); return; }
+  const ues = [...document.querySelectorAll('#rUesContainer .servico-item')];
+  if (!ues.length) { toast('⚠️ Adicione pelo menos um final ou UE'); return; }
+
+  if (redeEditando) {
+    const idx = dados.redes.findIndex(r => r.id === redeEditando);
+    if (idx > -1) {
+      const r = dados.redes[idx];
+      const ue = ues[0] ? ues[0].querySelector('.ru-ue').value.trim() : r.ue;
+      const amb = ues[0] ? ues[0].querySelector('.ru-ambientes .mo-item') : null;
+      r.pavimento = pavimento;
+      r.ue = ue || r.ue;
+      if (amb) {
+        r.ambiente = amb.querySelector('.ra-ambiente').value.trim() || r.ambiente;
+        r.bitola1 = amb.querySelector('.ra-bitola1').value;
+        r.bitola2 = amb.querySelector('.ra-bitola2').value;
+        const t = parseFloat(String(amb.querySelector('.ra-tamanho').value).replace(',', '.')) || 0;
+        if (t > 0) r.tamanho = t;
+      }
+    }
+    redeEditando = null;
+    salvar(); limparFormRede(); carregarRedesObra();
+    toast('✅ Rede atualizada!');
+    return;
+  }
+
+  const novos = [];
+  ues.forEach(bloco => {
+    const ue = bloco.querySelector('.ru-ue').value.trim();
+    if (!ue) return;
+    [...bloco.querySelectorAll('.ru-ambientes .mo-item')].forEach(amb => {
+      const ambiente = amb.querySelector('.ra-ambiente').value.trim();
+      const b1 = amb.querySelector('.ra-bitola1').value;
+      const b2 = amb.querySelector('.ra-bitola2').value;
+      const tamanho = parseFloat(String(amb.querySelector('.ra-tamanho').value).replace(',', '.')) || 0;
+      if (!ambiente || tamanho <= 0) return;
+      if (dados.redes.some(r => r.obra === obra && r.pavimento === pavimento && r.ue.toLowerCase() === ue.toLowerCase() && r.ambiente.toLowerCase() === ambiente.toLowerCase())) {
+        toast('⚠️ ' + ue + ' - ' + ambiente + ' já existe; pulada'); return;
+      }
+      novos.push({ id: gerarId(), obra: obra, pavimento: pavimento, ue: ue, ambiente: ambiente, bitola1: b1, bitola2: b2, tamanho: tamanho, status: 'Pendente', obs: '' });
+    });
+  });
+  if (!novos.length) { toast('⚠️ Nenhuma rede válida para salvar'); return; }
+  dados.redes.push(...novos);
+  salvar(); limparFormRede(); carregarRedesObra();
+  toast('✅ ' + novos.length + ' rede(s) criada(s) no pavimento ' + pavimento + '!');
+}
+
+function limparFormRede() {
+  document.getElementById('r_pavimento').value = '';
+  document.getElementById('rUesContainer').innerHTML = '';
+  redeEditando = null;
+}
+
+function renderRedes() {
+  const filtro = document.getElementById('filtroRedStatus').value;
+  let redes = redesDaObra();
+  if (filtro) redes = redes.filter(r => statusRede(r) === filtro);
+  redes.sort((a, b) => {
+    const p = ordemPavimentos(a.pavimento, b.pavimento);
+    if (p !== 0) return p;
+    const u = a.ue.localeCompare(b.ue, 'pt-BR');
+    if (u !== 0) return u;
+    return a.ambiente.localeCompare(b.ambiente, 'pt-BR');
+  });
+  let html = '<thead><tr><th>Pavimento</th><th>UE / Apto</th><th>Ambiente</th><th>Bitola 1</th><th>Bitola 2</th><th>Tamanho (m)</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+  redes.forEach(r => {
+    const idx = dados.redes.indexOf(r);
+    const st = statusRede(r);
+    const badge = st === 'Concluída' ? 'ok' : st === 'Enviado para produção' ? 'info' : 'warn';
+    html += '<tr><td><b>' + r.pavimento + '</b></td><td>' + r.ue + '</td><td>' + (r.ambiente || '—') + '</td>' +
+      '<td>' + r.bitola1 + '</td><td>' + r.bitola2 + '</td><td>' + fmtNum(r.tamanho) + '</td>' +
+      '<td><span class="badge ' + badge + '">' + st + '</span></td>' +
+      '<td><div class="actions-cell"><button class="btn small" onclick="editarRede(' + idx + ')">✏️</button>' +
+      '<button class="btn small danger" onclick="excluirRede(' + idx + ')">🗑️</button></div></td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaRedes').innerHTML = html;
+}
+
+function editarRede(idx) {
+  const r = dados.redes[idx];
+  redeEditando = r.id;
+  document.getElementById('r_pavimento').value = r.pavimento;
+  document.getElementById('rUesContainer').innerHTML = '';
+  adicionarUe(r.ue);
+  const bloco = document.getElementById('rUesContainer').lastElementChild;
+  const cont = bloco.querySelector('.ru-ambientes');
+  cont.innerHTML = '';
+  cont.appendChild(criarAmbienteBlock(r.ambiente || '', r.bitola1 || '3/8"', r.bitola2 || '5/8"', r.tamanho));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('✏️ Editando a rede ' + r.ue + ' - ' + (r.ambiente || '') + '. Ajuste e salve.');
+}
+
+function excluirRede(idx) {
+  if (confirm('Excluir esta rede?')) {
+    const r = dados.redes[idx];
+    if (r) {
+      dados.redes.splice(idx, 1);
+      dados.painelFabricacao = dados.painelFabricacao.filter(p => p.redeId !== r.id);
+    }
+    salvar(); carregarRedesObra();
+    toast('🗑️ Rede excluída.');
+  }
+}
+
+function duplicarPavimento(origem) {
+  const obra = document.getElementById('redObra').value;
+  const origemRedes = dados.redes.filter(r => r.obra === obra && r.pavimento === origem);
+  if (!origemRedes.length) { toast('⚠️ Nenhuma rede no pavimento ' + origem); return; }
+  const novo = prompt('Novo pavimento (cópia de "' + origem + '" com ' + origemRedes.length + ' rede(s)):\nEx: 14 (vira 14ª Pavimento)', origem);
+  if (!novo || !novo.trim()) return;
+  const nome = novo.trim();
+  if (dados.redes.some(r => r.obra === obra && r.pavimento.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Já existem redes no pavimento ' + nome); return; }
+  origemRedes.forEach(r => {
+    dados.redes.push({ id: gerarId(), obra: obra, pavimento: nome, ue: r.ue, ambiente: r.ambiente || '', bitola1: r.bitola1, bitola2: r.bitola2, tamanho: r.tamanho, status: 'Pendente', obs: r.obs || '' });
+  });
+  salvar(); renderRelatorioPavimentos(); renderRedes();
+  toast('✅ Pavimento "' + nome + '" criado com ' + origemRedes.length + ' rede(s)!');
+}
+
+// ===== LISTA DE MATERIAL =====
+function imprimirListaMaterialPavimento(pav) {
+  const obra = document.getElementById('redObra').value;
+  if (!obra) { toast('⚠️ Selecione uma obra'); return; }
+  const redes = redesDaObra().filter(r => r.pavimento === pav);
+  if (!redes.length) { toast('⚠️ Nenhuma rede no pavimento ' + pav); return; }
+
+  const mat = {};
+  function somar(desc, un, qtd) { if (!mat[desc]) mat[desc] = { un: un, qtd: 0 }; mat[desc].qtd += qtd; }
+  redes.forEach(r => {
+    const L = r.tamanho;
+    const b1 = String(r.bitola1).replace(/"/g, '');
+    const b2 = String(r.bitola2).replace(/"/g, '');
+    somar('TUBO DE COBRE ' + b1, 'm', L);
+    somar('TUBO DE COBRE ' + b2, 'm', L);
+    somar('TUBO ESPONJOSO ' + b1, 'm', L);
+    somar('TUBO ESPONJOSO ' + b2, 'm', L);
+    somar('CABO PP', 'm', L + 0.20);
+    somar('FITA SILVER TAPE', 'm', L * 0.50);
+    somar('ABRAÇADEIRA 1.1/2', 'un', L / 2);
+    somar('PINO', 'un', L / 2);
+    somar('FINCA PINO', 'un', L / 2);
+    somar('PORCA 3/16', 'un', L / 2);
+    somar('ARRUELA 3/16', 'un', L / 2);
+  });
+  const ord = { 'TUBO': 1, 'CABO': 2, 'FITA': 3, 'ABRAÇADEIRA': 4, 'PINO': 5, 'FINCA': 6, 'PORCA': 7, 'ARRUELA': 8 };
+  const descs = Object.keys(mat).sort((a, b) => {
+    const ga = ord[a.split(' ')[0]] || 99, gb = ord[b.split(' ')[0]] || 99;
+    if (ga !== gb) return ga - gb;
+    if (a.indexOf('COBRE') > -1 && b.indexOf('ESPONJOSO') > -1) return -1;
+    if (a.indexOf('ESPONJOSO') > -1 && b.indexOf('COBRE') > -1) return 1;
+    const va = a.match(/(\d+)\/(\d+)/), vb = b.match(/(\d+)\/(\d+)/);
+    return (va ? parseInt(va[1]) / parseInt(va[2]) : 0) - (vb ? parseInt(vb[1]) / parseInt(vb[2]) : 0);
+  });
+  let linhas = '', item = 1;
+  descs.forEach(d => { linhas += '<tr><td>' + item + '</td><td>' + d + '</td><td>' + mat[d].un + '</td><td>' + fmtNum2(mat[d].qtd) + '</td></tr>'; item++; });
+
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Lista de Material</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}body{margin:12mm;font-size:12px}h1{font-size:16px;text-align:center;border:1.5px solid #000;padding:3mm;margin-bottom:4mm}.dados{display:flex;justify-content:space-between;border:1px solid #000;padding:2.5mm;margin-bottom:3mm;font-weight:700}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#d9d9d9;border:1px solid #000;padding:2mm;text-align:left}td{border:1px solid #000;padding:2mm}.rodape{margin-top:6mm;font-size:10px}@media print{body{margin:10mm}}</style></head><body><h1>LISTA DE MATERIAL</h1><div class="dados"><span>OBRA: ' + obra + '</span><span>PAVIMENTO: ' + pav + '</span><span>DATA: ' + new Date().toLocaleDateString('pt-BR') + '</span></div><table><thead><tr><th style="width:8%">ITEM</th><th>DESCRIÇÃO</th><th style="width:10%">UN</th><th style="width:14%">QTD</th></tr></thead><tbody>' + linhas + '</tbody></table><div class="rodape">Gerado em ' + new Date().toLocaleDateString('pt-BR') + '</div><script>window.print();<\/script></body></html>');
+  janela.document.close();
+}
+
+// ===== ETIQUETAS =====
+function imprimirEtiquetasPavimento(pav) {
+  const obra = document.getElementById('redObra').value;
+  if (!obra) { toast('⚠️ Selecione uma obra'); return; }
+  const redes = redesDaObra().filter(r => r.pavimento === pav);
+  if (!redes.length) { toast('⚠️ Nenhuma rede no pavimento ' + pav); return; }
+  redes.sort((a, b) => {
+    const u = a.ue.localeCompare(b.ue, 'pt-BR');
+    if (u !== 0) return u;
+    return a.ambiente.localeCompare(b.ambiente, 'pt-BR');
+  });
+  adicionarRedesAoPainel(redes);
+  function lb(b) { return String(b).replace(/"/g, ''); }
+  let etq = '';
+  redes.forEach(r => {
+    for (let i = 0; i < 2; i++) {
+      etq += '<div class="etiqueta"><table class="etq-tabela">' +
+        '<tr><td colspan="2" class="etq-logo">AMBIENTE MIX</td><td class="etq-bitola">' + lb(r.bitola1) + ' e ' + lb(r.bitola2) + '</td></tr>' +
+        '<tr><td class="etq-ambiente">' + (r.ambiente || '') + '</td><td class="etq-obra">' + obra + ' - ' + r.ue + '</td>' +
+        '<td class="etq-tamanho">' + fmtNum(r.tamanho) + '</td></tr></table></div>';
+    }
+  });
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.open();
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Etiquetas</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}body{padding:8mm}.grid{display:grid;grid-template-columns:1fr 1fr;gap:5mm}.etiqueta{border:1px solid #000;page-break-inside:avoid}.etq-tabela{width:100%;border-collapse:collapse;table-layout:fixed}.etq-tabela td{border:1px solid #000;text-align:center;vertical-align:middle;padding:2.5mm}.etq-logo{width:60%;height:16mm;font-size:13px;font-weight:700;text-transform:uppercase}.etq-bitola{width:40%;font-size:12px;font-weight:700}.etq-ambiente{font-size:11px;font-weight:700;text-transform:uppercase}.etq-obra{font-size:11px}.etq-tamanho{font-size:16px;font-weight:700}@media print{body{padding:5mm}}</style></head><body><div class="grid">' + etq + '</div><script>function go(){setTimeout(function(){window.focus();window.print()},500)}if(document.readyState==="complete"){go()}else{window.addEventListener("load",go)}setTimeout(go,3000);<\/script></body></html>');
+  janela.document.close();
+}
+
+// ===== CONTROLE DE SAÍDA =====
+function imprimirControleSaidaPavimento(pav) {
+  const obra = document.getElementById('redObra').value;
+  if (!obra) { toast('⚠️ Selecione uma obra'); return; }
+  const redes = redesDaObra().filter(r => r.pavimento === pav);
+  if (!redes.length) { toast('⚠️ Nenhuma rede no pavimento ' + pav); return; }
+
+  let atualizadas = 0;
+  redes.forEach(r => { if (statusRede(r) !== 'Concluída') { r.status = 'Concluída'; atualizadas++; } });
+  if (atualizadas > 0) { salvar(); carregarRedesObra(); toast('✅ ' + atualizadas + ' rede(s) do ' + pav + ' marcada(s) como Concluída'); }
+
+  const remessa = prompt('Número da remessa (NF), deixe vazio se não tiver:', '');
+  if (remessa === null) return;
+
+  redes.sort((a, b) => {
+    const u = a.ue.localeCompare(b.ue, 'pt-BR');
+    if (u !== 0) return u;
+    return a.ambiente.localeCompare(b.ambiente, 'pt-BR');
+  });
+  let linhas = '';
+  redes.forEach(r => {
+    linhas += '<tr><td>1</td><td>REDE FRIG (C) (' + r.bitola1 + ' - ' + r.bitola2 + ') - 01 MT</td><td>1</td><td>' + fmtNum2(r.tamanho) + '</td><td>' + (r.ambiente || '') + ' - ' + r.ue + '</td></tr>';
+  });
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Controle de Saída</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}body{margin:10mm;font-size:11px}.l1,.l2{display:flex;justify-content:space-between;border:1px solid #000;padding:3mm;margin-bottom:2mm}.ass{display:flex;border:1px solid #000;margin-bottom:4mm}.ass>div{flex:1;border-right:1px solid #000;padding:3mm;text-align:center;font-size:10px}.ass>div:last-child{border-right:none}.dgq{text-align:center;font-size:10px;margin-bottom:1mm}h1{font-size:15px;text-align:center;border:1.5px solid #000;padding:2.5mm;margin-bottom:4mm}.dados{display:flex;justify-content:space-between;border:1px solid #000;padding:2.5mm;margin-bottom:3mm;font-weight:700}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#d9d9d9;border:1px solid #000;padding:2mm;text-align:left}td{border:1px solid #000;padding:2mm}.total{border:1px solid #000;padding:2mm;margin-top:2mm;font-weight:700;text-align:right}.rod{display:flex;justify-content:space-between;border:1px solid #000;padding:2mm;margin-top:4mm;font-size:9px}@media print{body{margin:8mm}}</style></head><body><div class="l1"><span>RECEBEMOS DA JOULE ENGENHARIA TÉRMICA OS PRODUTOS CONSTANTES DO FORMULÁRIO DE LIBERAÇÃO DE REDES</span><span>REFERENTE A NF</span></div><div class="l2"><span>DATA DE RECEBIMENTO</span><span>IDENTIFICAÇÃO E ASSINATURA DO RECEBEDOR</span></div><div class="ass"><div>Resp. Expedição<br>Data e Assinatura</div><div>Resp. Dept. Solicitante<br>Data e Assinatura</div><div>Motorista<br>Data e Assinatura</div></div><div class="dgq">DGQ - Sistema de Gestão da qualidade<br>FORM.ALM.15 – Controle de Saída de KITS</div><h1>CONTROLE DE SAÍDA DE KITS</h1><div class="dados"><span>CLIENTE: ' + obra + '</span><span>REMESSA: ' + (remessa || '—') + '</span><span>DATA: ' + new Date().toLocaleDateString('pt-BR') + '</span></div><table><thead><tr><th style="width:6%">ITEM</th><th>DESCRIÇÃO</th><th style="width:6%">UN</th><th style="width:10%">QTD</th><th style="width:22%">AMBIENTE</th></tr></thead><tbody>' + linhas + '</tbody></table><div class="total">QTD: ' + redes.length + '</div><div class="rod"><span>FORM.ALM.15 - Controle de Saída de KITS</span><span>FIN | Pasta suspensa | Indeterminado | -</span></div><script>window.print();<\/script></body></html>');
+  janela.document.close();
+}
+// ===== PAINEL DE FABRICAÇÃO =====
+let fabDragId = null;
+function chavePav(p) { return p.obra + '||' + p.pavimento; }
+
+function agruparPainel(lista) {
+  const grupos = {};
+  lista.forEach(p => {
+    const k = chavePav(p);
+    if (!grupos[k]) grupos[k] = { obra: p.obra, pavimento: p.pavimento, itens: [] };
+    grupos[k].itens.push(p);
+  });
+  return Object.values(grupos);
+}
+
+function statusGrupo(itens) {
+  if (itens.every(i => i.status === 'Concluída')) return 'Concluída';
+  if (itens.some(i => i.status === 'Em produção')) return 'Em produção';
+  if (itens.some(i => i.status === 'Pausada')) return 'Pausada';
+  return 'Na fila';
+}
+
+function previsaoGrupo(itens) {
+  const c = itens.find(i => i.previsaoSaida);
+  return c ? c.previsaoSaida : (itens[0] ? (itens[0].previsaoSaida || '') : '');
+}
+
+function bitolasGrupo(itens) {
+  const b = {};
+  BITOLAS_TOTAIS.forEach(x => b[x] = 0);
+  itens.forEach(i => {
+    const b1 = String(i.bitola1 || '').replace(/"/g, '');
+    const b2 = String(i.bitola2 || '').replace(/"/g, '');
+    if (b[b1] !== undefined) b[b1] += i.tamanho;
+    if (b[b2] !== undefined) b[b2] += i.tamanho;
+  });
+  return b;
+}
+
+function metrosGrupo(itens) { return itens.reduce((s, i) => s + i.tamanho, 0); }
+function caboGrupo(itens) { return itens.reduce((s, i) => s + (i.tamanho + 0.20), 0); }
+function prazoGrupo(itens) { return metrosGrupo(itens) / 200; }
+
+function adicionarRedesAoPainel(redes) {
+  let novos = 0, atualizados = 0;
+  redes.forEach(r => {
+    const rede = dados.redes.find(x => x.id === r.id);
+    if (rede && statusRede(rede) !== 'Concluída') { rede.status = 'Enviado para produção'; atualizados++; }
+    if (dados.painelFabricacao.some(p => p.redeId === r.id)) return;
+    dados.painelFabricacao.push({
+      redeId: r.id, obra: r.obra, pavimento: r.pavimento, ue: r.ue,
+      ambiente: r.ambiente || '', bitola1: r.bitola1, bitola2: r.bitola2,
+      tamanho: r.tamanho, status: 'Na fila', previsaoSaida: '',
+      dataInclusao: hoje(), dataConclusao: '', obs: ''
+    });
+    novos++;
+  });
+  if (novos > 0 || atualizados > 0) {
+    salvar();
+    renderCardsFabricacao();
+    renderFilaProducao();
+    renderRedesProduzidas();
+    renderPrevisaoMaterial();
+    carregarRedesObra();
+    toast(novos > 0 ? '✅ ' + novos + ' rede(s) enviada(s) para produção' : '✅ Status atualizado para Enviado para produção');
+  }
+  return novos;
+}
+
+function adicionarPendentesPainel() {
+  const obra = document.getElementById('filtroFabObra').value;
+  if (!obra) { toast('⚠️ Selecione uma obra no filtro do painel'); return; }
+  const pend = dados.redes.filter(r => r.obra === obra && statusRede(r) === 'Pendente');
+  if (!pend.length) { toast('⚠️ Nenhuma rede pendente para ' + obra); return; }
+  const n = adicionarRedesAoPainel(pend);
+  if (n === 0) toast('ℹ️ As pendentes já estão no painel.');
+}
+
+function preencherSelectsFabricacao() {
+  const obras = [...new Set(dados.painelFabricacao.map(p => p.obra).concat(dados.obras.map(o => o.nome)))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const op = '<option value="">Todas as obras</option>' + obras.map(o => '<option>' + o + '</option>').join('');
+  document.getElementById('filtroFabObra').innerHTML = op;
+  document.getElementById('filtroFabObraProd').innerHTML = op;
+  document.getElementById('fp_data').value = hoje();
+  preencherColabsFabrica();
+}
+
+function renderCardsFabricacao() {
+  const f = dados.painelFabricacao;
+  const naFila = f.filter(p => p.status === 'Na fila').length;
+  const prod = f.filter(p => p.status === 'Em produção').length;
+  const paus = f.filter(p => p.status === 'Pausada').length;
+  const conc = f.filter(p => p.status === 'Concluída').length;
+  const mPend = f.filter(p => p.status !== 'Concluída').reduce((s, p) => s + p.tamanho, 0);
+  const mConc = f.filter(p => p.status === 'Concluída').reduce((s, p) => s + p.tamanho, 0);
+  document.getElementById('cardsFabricacao').innerHTML =
+    '<div class="card"><div class="label">Na Fila</div><div class="value blue">' + naFila + '</div></div>' +
+    '<div class="card"><div class="label">Em Produção</div><div class="value orange">' + prod + '</div></div>' +
+    '<div class="card"><div class="label">Pausadas</div><div class="value red">' + paus + '</div></div>' +
+    '<div class="card"><div class="label">Concluídas</div><div class="value green">' + conc + '</div></div>' +
+    '<div class="card"><div class="label">m Pendentes</div><div class="value orange">' + fmtNum(mPend) + '</div></div>' +
+    '<div class="card"><div class="label">m Concluídos</div><div class="value green">' + fmtNum(mConc) + '</div></div>';
+}
+
+function tabelaAgrupada(grupos, tipo) {
+  let html = '<thead><tr>' +
+    '<th rowspan="2">#</th><th rowspan="2">Obra</th><th rowspan="2">Pavimento</th>' +
+    '<th colspan="6">Bitolas Metro</th><th rowspan="2">Cabo PP Metro</th>' +
+    '<th rowspan="2">Previsão de Saída</th><th rowspan="2">Prazo (dias)</th>' +
+    (tipo === 'fila' ? '<th rowspan="2">Status</th><th rowspan="2">Ordem</th>' : '<th rowspan="2">Concluída em</th><th rowspan="2">Ações</th>') +
+    '</tr><tr>' + BITOLAS_TOTAIS.map(b => '<th>' + b + '</th>').join('') + '</tr></thead><tbody>';
+  if (!grupos.length) {
+    html += '<tr><td colspan="14" style="text-align:center;color:#6b7280">' +
+      (tipo === 'fila' ? 'Nenhum pavimento na fila. Gere as etiquetas de um pavimento para preencher a fila.' : 'Nenhum pavimento produzido ainda.') + '</td></tr>';
+  } else {
+    grupos.forEach((g, i) => {
+      const b = bitolasGrupo(g.itens);
+      const pv = previsaoGrupo(g.itens);
+      const lb = BITOLAS_TOTAIS.map(x => '<td>' + (b[x] > 0 ? fmtNum(b[x]) : '—') + '</td>').join('');
+      if (tipo === 'fila') {
+        const st = statusGrupo(g.itens);
+        const chave = chavePav(g.itens[0]);
+        html += '<tr draggable="true" ondragstart="dragFab(event,\'' + chave + '\')" ondragover="event.preventDefault()" ondrop="dropFab(event,\'' + chave + '\')">' +
+          '<td>' + (i + 1) + '</td><td><b>' + g.obra + '</b></td><td>' + formatarPavimento(g.pavimento) + '</td>' + lb +
+          '<td>' + fmtNum2(caboGrupo(g.itens)) + '</td>' +
+          '<td><input type="date" style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px" value="' + pv + '" onchange="salvarPrevisaoSaidaPav(\'' + g.obra + '\',\'' + g.pavimento + '\',this.value)"></td>' +
+          '<td>' + fmtNum2(prazoGrupo(g.itens)) + '</td>' +
+          '<td><select style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px" onchange="mudarStatusPav(\'' + g.obra + '\',\'' + g.pavimento + '\',this.value)">' +
+            '<option ' + (st === 'Na fila' ? 'selected' : '') + '>Na fila</option>' +
+            '<option ' + (st === 'Em produção' ? 'selected' : '') + '>Em produção</option>' +
+            '<option ' + (st === 'Pausada' ? 'selected' : '') + '>Pausada</option><option>Concluída</option></select></td>' +
+          '<td><div class="actions-cell">' +
+            '<button class="btn small" onclick="moverPav(-1,\'' + g.obra + '\',\'' + g.pavimento + '\')"' + (i === 0 ? ' disabled' : '') + '>▲</button>' +
+            '<button class="btn small" onclick="moverPav(1,\'' + g.obra + '\',\'' + g.pavimento + '\')"' + (i === grupos.length - 1 ? ' disabled' : '') + '>▼</button>' +
+            '<button class="btn small green" onclick="concluirPav(\'' + g.obra + '\',\'' + g.pavimento + '\')">🏁</button>' +
+            '<button class="btn small danger" onclick="removerPav(\'' + g.obra + '\',\'' + g.pavimento + '\')">🗑️</button>' +
+          '</div></td></tr>';
+      } else {
+        const dataConc = g.itens.map(x => x.dataConclusao).filter(Boolean).sort().pop() || '';
+        html += '<tr><td>' + (i + 1) + '</td><td><b>' + g.obra + '</b></td><td>' + formatarPavimento(g.pavimento) + '</td>' + lb +
+          '<td>' + fmtNum2(caboGrupo(g.itens)) + '</td>' +
+          '<td>' + (pv ? fmtData(pv) : '—') + '</td>' +
+          '<td>' + fmtNum2(prazoGrupo(g.itens)) + '</td>' +
+          '<td>' + (dataConc ? fmtData(dataConc) : '—') + '</td>' +
+          '<td><div class="actions-cell">' +
+            '<button class="btn small" onclick="reabrirPav(\'' + g.obra + '\',\'' + g.pavimento + '\')">↩️ Reabrir</button>' +
+            '<button class="btn small danger" onclick="removerPav(\'' + g.obra + '\',\'' + g.pavimento + '\')">🗑️</button>' +
+          '</div></td></tr>';
+      }
+    });
+  }
+  html += '</tbody>';
+  return html;
+}
+
+function renderFilaProducao() {
+  const fObra = document.getElementById('filtroFabObra').value;
+  const fStatus = document.getElementById('filtroFabStatus').value;
+  let itens = dados.painelFabricacao.filter(p => p.status !== 'Concluída');
+  if (fObra) itens = itens.filter(p => p.obra === fObra);
+  if (fStatus) itens = itens.filter(p => p.status === fStatus);
+  const grupos = agruparPainel(itens);
+  const totMetros = itens.reduce((s, p) => s + p.tamanho, 0);
+  const totCabo = itens.reduce((s, p) => s + (p.tamanho + 0.20), 0);
+  document.getElementById('resumoFilaProducao').innerHTML = '<div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:0">' +
+    '<div class="card"><div class="label">Pavimentos na Fila</div><div class="value blue">' + grupos.length + '</div></div>' +
+    '<div class="card"><div class="label">Redes na Fila</div><div class="value blue">' + itens.length + '</div></div>' +
+    '<div class="card"><div class="label">Total de Metros</div><div class="value blue">' + fmtNum(totMetros) + '</div></div>' +
+    '<div class="card"><div class="label">Total de Cabo PP</div><div class="value orange">' + fmtNum(totCabo) + ' m</div></div>' +
+    '<div class="card"><div class="label">Prazo Estimado</div><div class="value green">' + fmtNum(totMetros / 200) + ' dias</div></div></div>';
+  document.getElementById('tabelaFabricacao').innerHTML = tabelaAgrupada(grupos, 'fila');
+}
+
+function renderRedesProduzidas() {
+  const fObra = document.getElementById('filtroFabObraProd').value;
+  let itens = dados.painelFabricacao.filter(p => p.status === 'Concluída');
+  if (fObra) itens = itens.filter(p => p.obra === fObra);
+  const grupos = agruparPainel(itens);
+  const totMetros = itens.reduce((s, p) => s + p.tamanho, 0);
+  const totCabo = itens.reduce((s, p) => s + (p.tamanho + 0.20), 0);
+  document.getElementById('resumoRedesProduzidas').innerHTML = '<div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:0">' +
+    '<div class="card"><div class="label">Pavimentos Produzidos</div><div class="value green">' + grupos.length + '</div></div>' +
+    '<div class="card"><div class="label">Redes Produzidas</div><div class="value green">' + itens.length + '</div></div>' +
+    '<div class="card"><div class="label">Total de Metros</div><div class="value green">' + fmtNum(totMetros) + '</div></div>' +
+    '<div class="card"><div class="label">Total de Cabo PP</div><div class="value blue">' + fmtNum(totCabo) + ' m</div></div></div>';
+  document.getElementById('tabelaRedesProduzidas').innerHTML = tabelaAgrupada(grupos, 'produzidas');
+}
+
+function salvarPrevisaoSaidaPav(obra, pav, data) {
+  dados.painelFabricacao.forEach(p => { if (p.obra === obra && p.pavimento === pav) p.previsaoSaida = data; });
+  salvar();
+}
+
+function mudarStatusPav(obra, pav, status) {
+  dados.painelFabricacao.forEach(p => {
+    if (p.obra === obra && p.pavimento === pav) {
+      p.status = status;
+      p.dataConclusao = status === 'Concluída' ? hoje() : '';
+      const r = dados.redes.find(x => x.id === p.redeId);
+      if (r) r.status = status === 'Concluída' ? 'Concluída' : 'Enviado para produção';
+    }
+  });
+  salvar(); renderCardsFabricacao(); renderFilaProducao(); renderRedesProduzidas(); renderPrevisaoMaterial(); carregarRedesObra();
+}
+
+function concluirPav(obra, pav) { mudarStatusPav(obra, pav, 'Concluída'); toast('✅ Pavimento concluído! Movido para Redes Produzidas.'); }
+
+function reabrirPav(obra, pav) {
+  dados.painelFabricacao.forEach(p => {
+    if (p.obra === obra && p.pavimento === pav) {
+      p.status = 'Na fila'; p.dataConclusao = '';
+      const r = dados.redes.find(x => x.id === p.redeId);
+      if (r) r.status = 'Enviado para produção';
+    }
+  });
+  salvar(); renderCardsFabricacao(); renderFilaProducao(); renderRedesProduzidas(); renderPrevisaoMaterial(); carregarRedesObra();
+  toast('↩️ Pavimento reaberto na Fila de Produção.');
+}
+
+function removerPav(obra, pav) {
+  if (confirm('Remover este pavimento do painel? As redes voltarão para Pendente na aba Redes Frigorígenas.')) {
+    dados.painelFabricacao.forEach(p => {
+      if (p.obra === obra && p.pavimento === pav) {
+        const r = dados.redes.find(x => x.id === p.redeId);
+        if (r) r.status = 'Pendente';
+      }
+    });
+    dados.painelFabricacao = dados.painelFabricacao.filter(p => !(p.obra === obra && p.pavimento === pav));
+    salvar(); renderCardsFabricacao(); renderFilaProducao(); renderRedesProduzidas(); renderPrevisaoMaterial(); carregarRedesObra();
+    toast('🗑️ Pavimento removido. Redes voltaram para Pendente.');
+  }
+}
+
+function moverPav(dir, obra, pav) {
+  const fila = dados.painelFabricacao;
+  const chave = obra + '||' + pav;
+  const grupo = fila.filter(p => chavePav(p) === chave);
+  if (!grupo.length) return;
+  const resto = fila.filter(p => chavePav(p) !== chave);
+  const primeiro = fila.findIndex(p => chavePav(p) === chave);
+  let alvo = 0;
+  for (let i = 0; i < primeiro; i++) if (chavePav(fila[i]) !== chave) alvo++;
+  const novoAlvo = alvo + dir;
+  if (novoAlvo < 0 || novoAlvo > resto.length) return;
+  resto.splice(novoAlvo, 0, ...grupo);
+  dados.painelFabricacao = resto;
+  salvar(); renderFilaProducao();
+}
+
+function dragFab(ev, chave) { fabDragId = chave; }
+
+function dropFab(ev, chave) {
+  ev.preventDefault();
+  if (!fabDragId || fabDragId === chave) return;
+  const fila = dados.painelFabricacao;
+  const grupo = fila.filter(p => chavePav(p) === fabDragId);
+  if (!grupo.length) return;
+  const resto = fila.filter(p => chavePav(p) !== fabDragId);
+  const alvo = resto.findIndex(p => chavePav(p) === chave);
+  if (alvo < 0) return;
+  resto.splice(alvo, 0, ...grupo);
+  dados.painelFabricacao = resto;
+  salvar(); renderFilaProducao();
+}
+
+// ===== PRODUÇÃO DO DIA =====
+function preencherColabsFabrica() {
+  const container = document.getElementById('fpColaboradoresContainer');
+  if (!container) return;
+  let html = '';
+  dados.colaboradores.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(c => {
+    html += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 6px;border:1px solid #e5e7eb;border-radius:6px;background:#fff"><input type="checkbox" class="fp-colab" value="' + c.nome + '"> ' + c.nome + '</label>';
+  });
+  container.innerHTML = html || '<p style="color:#6b7280">Nenhum colaborador cadastrado.</p>';
+}
+
+function salvarProducaoDia() {
+  const data = document.getElementById('fp_data').value;
+  const marcados = [...document.querySelectorAll('#fpColaboradoresContainer .fp-colab:checked')].map(c => c.value);
+  const metros = parseFloat(String(document.getElementById('fp_metros').value).replace(',', '.')) || 0;
+  const obs = document.getElementById('fp_obs').value.trim();
+  if (!data) { toast('⚠️ Informe a data'); return; }
+  if (!marcados.length) { toast('⚠️ Marque pelo menos um colaborador'); return; }
+  if (metros <= 0) { toast('⚠️ Informe os metros produzidos'); return; }
+  const bloq = marcados.filter(n => dados.apontamentos.some(a => a.data === data && a.colaborador === n && a.origem === 'fabricacao'));
+  if (bloq.length) { alert('🚫 Os colaboradores abaixo já foram lançados na FÁBRICA nesta data:\n\n' + bloq.join('\n') + '\n\nRemova-os ou escolha outra data.'); return; }
+
+  dados.produtividade.push({ data: data, colaboradores: marcados, metros: metros, obs: obs });
+  marcados.forEach(n => {
+    const c = dados.colaboradores.find(x => x.nome === n);
+    dados.apontamentos.push({
+      data: data, obra: 'FÁBRICA DE REDES', colaborador: n,
+      funcao: c ? c.funcao : '', horas: DIA_PADRAO,
+      servico: 'Fabricação de Redes Frigorígenas', tarefa: 'Produção do dia',
+      obs: obs, origem: 'fabricacao', situacao: 'Trabalhado'
+    });
+  });
+  salvar();
+  document.getElementById('fp_metros').value = '';
+  document.getElementById('fp_obs').value = '';
+  preencherColabsFabrica();
+  renderRelatorioFabricacao();
+  toast('✅ Produção registrada! Colaboradores lançados nos Apontamentos.');
+}
+
+function renderRelatorioFabricacao() {
+  const ini = document.getElementById('fpDataIni').value;
+  const fim = document.getElementById('fpDataFim').value;
+  let regs = dados.produtividade.slice();
+  if (ini) regs = regs.filter(r => r.data >= ini);
+  if (fim) regs = regs.filter(r => r.data <= fim);
+  regs.sort((a, b) => b.data.localeCompare(a.data));
+  let totM = 0, totP = 0;
+  regs.forEach(r => { totM += r.metros; totP += r.colaboradores.length; });
+  document.getElementById('cardsFabProd').innerHTML =
+    '<div class="card"><div class="label">Dias Registrados</div><div class="value blue">' + regs.length + '</div></div>' +
+    '<div class="card"><div class="label">Total de Metros</div><div class="value green">' + fmtNum(totM) + '</div></div>' +
+    '<div class="card"><div class="label">Pessoas-Dia</div><div class="value blue">' + totP + '</div></div>' +
+    '<div class="card"><div class="label">Média m/dia</div><div class="value orange">' + (regs.length ? fmtNum(totM / regs.length) : '0,0') + '</div></div>' +
+    '<div class="card"><div class="label">Média m/pessoa/dia</div><div class="value blue">' + (totP ? fmtNum(totM / totP) : '0,0') + '</div></div>';
+  let html = '<thead><tr><th>Data</th><th>Colaboradores</th><th>Qtd. Pessoas</th><th>Metros Produzidos</th><th>m por Pessoa</th><th>Obs.</th><th>Ações</th></tr></thead><tbody>';
+  if (!regs.length) {
+    html += '<tr><td colspan="7" style="text-align:center;color:#6b7280">Nenhum registro de produção no período.</td></tr>';
+  } else {
+    regs.forEach(r => {
+      const idx = dados.produtividade.indexOf(r);
+      html += '<tr><td>' + fmtData(r.data) + '</td><td>' + r.colaboradores.join(', ') + '</td>' +
+        '<td>' + r.colaboradores.length + '</td><td>' + fmtNum(r.metros) + ' m</td>' +
+        '<td>' + fmtNum(r.metros / r.colaboradores.length) + ' m</td><td>' + (r.obs || '—') + '</td>' +
+        '<td><button class="btn small danger" onclick="excluirProducaoDia(' + idx + ')">🗑️</button></td></tr>';
+    });
+  }
+  html += '</tbody>';
+  document.getElementById('relatorioFabricacao').innerHTML = html;
+  renderPrevisaoMaterial();
+}
+
+function excluirProducaoDia(idx) {
+  if (confirm('Excluir este registro de produção?')) {
+    const r = dados.produtividade[idx];
+    if (r) {
+      const d = r.data;
+      dados.produtividade.splice(idx, 1);
+      dados.apontamentos = dados.apontamentos.filter(a => !(a.data === d && a.origem === 'fabricacao'));
+    }
+    salvar(); renderRelatorioFabricacao();
+    toast('🗑️ Registro excluído (e apontamentos da fábrica nessa data removidos).');
+  }
+}
+
+function imprimirRelatorioProducao() {
+  const ini = document.getElementById('fpDataIni').value;
+  const fim = document.getElementById('fpDataFim').value;
+  let regs = dados.produtividade.slice();
+  if (ini) regs = regs.filter(r => r.data >= ini);
+  if (fim) regs = regs.filter(r => r.data <= fim);
+  regs.sort((a, b) => a.data.localeCompare(b.data));
+  let linhas = '', totM = 0, totP = 0;
+  regs.forEach(r => {
+    totM += r.metros; totP += r.colaboradores.length;
+    linhas += '<tr><td>' + fmtData(r.data) + '</td><td>' + r.colaboradores.join(', ') + '</td><td>' + r.colaboradores.length + '</td><td>' + fmtNum(r.metros) + '</td><td>' + fmtNum(r.metros / r.colaboradores.length) + '</td></tr>';
+  });
+  const janela = window.open('', '_blank');
+  if (!janela) { toast('⚠️ Permita pop-ups para imprimir'); return; }
+  janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Produção</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}body{margin:12mm;font-size:12px}h1{font-size:16px;text-align:center;border:1.5px solid #000;padding:3mm;margin-bottom:4mm}.dados{display:flex;justify-content:space-between;border:1px solid #000;padding:2.5mm;margin-bottom:3mm;font-weight:700}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#d9d9d9;border:1px solid #000;padding:2mm;text-align:left}td{border:1px solid #000;padding:2mm}.total{border:1px solid #000;padding:2mm;margin-top:2mm;font-weight:700;text-align:right}@media print{body{margin:10mm}}</style></head><body><h1>RELATÓRIO DE PRODUÇÃO - FÁBRICA DE REDES</h1><div class="dados"><span>PERÍODO: ' + (ini ? fmtData(ini) : 'Início') + ' a ' + (fim ? fmtData(fim) : 'Hoje') + '</span><span>DATA: ' + new Date().toLocaleDateString('pt-BR') + '</span></div><table><thead><tr><th>Data</th><th>Colaboradores</th><th>Qtd. Pessoas</th><th>Metros</th><th>m por Pessoa</th></tr></thead><tbody>' + linhas + '</tbody></table><div class="total">TOTAL: ' + fmtNum(totM) + ' m | Pessoas-dia: ' + totP + '</div><script>window.print();<\/script></body></html>');
+  janela.document.close();
+}
+
+// ===== PREVISÃO DE MATERIAL =====
+function calcularMateriaisPrevisao(lista) {
+  const mat = {};
+  function somar(desc, un, qtd) { if (!mat[desc]) mat[desc] = { un: un, qtd: 0 }; mat[desc].qtd += qtd; }
+  lista.forEach(r => {
+    const L = r.tamanho;
+    const b1 = String(r.bitola1).replace(/"/g, '');
+    const b2 = String(r.bitola2).replace(/"/g, '');
+    somar('TUBO DE COBRE ' + b1, 'm', L);
+    somar('TUBO DE COBRE ' + b2, 'm', L);
+    somar('TUBO ESPONJOSO ' + b1, 'm', L);
+    somar('TUBO ESPONJOSO ' + b2, 'm', L);
+    somar('CABO PP', 'm', L + 0.20);
+  });
+  return mat;
+}
+
+function renderPrevisaoMaterial() {
+  const pend = dados.painelFabricacao.filter(p => p.status !== 'Concluída');
+  const mat = calcularMateriaisPrevisao(pend);
+  const tot = pend.reduce((s, p) => s + p.tamanho, 0);
+  let html = '<p style="color:#6b7280;margin-bottom:10px">🔵 <b>' + pend.length + '</b> rede(s) pendente(s), <b>' + fmtNum(tot) + ' m</b> a produzir. Necessário apenas tubo de cobre, tubo esponjoso e cabo PP:</p>';
+  html += '<table><thead><tr><th>Material</th><th>Un</th><th>Qtd Necessária</th></tr></thead><tbody>';
+  const descs = Object.keys(mat);
+  if (!descs.length) {
+    html += '<tr><td colspan="3" style="text-align:center;color:#6b7280">Nenhuma rede pendente no painel, previsão vazia.</td></tr>';
+  } else {
+    descs.sort((a, b) => {
+      const ga = a.indexOf('COBRE') > -1 ? 1 : a.indexOf('ESPONJOSO') > -1 ? 2 : 3;
+      const gb = b.indexOf('COBRE') > -1 ? 1 : b.indexOf('ESPONJOSO') > -1 ? 2 : 3;
+      if (ga !== gb) return ga - gb;
+      const va = a.match(/(\d+)\/(\d+)/), vb = b.match(/(\d+)\/(\d+)/);
+      return (va ? parseInt(va[1]) / parseInt(va[2]) : 0) - (vb ? parseInt(vb[1]) / parseInt(vb[2]) : 0);
+    });
+    descs.forEach(d => { html += '<tr><td>' + d + '</td><td>' + mat[d].un + '</td><td>' + fmtNum2(mat[d].qtd) + '</td></tr>'; });
+  }
+  html += '</tbody></table>';
+  document.getElementById('previsaoMaterial').innerHTML = html;
+}
+
+// ===== FERRAMENTAS =====
+function preencherSelectsFerramentas() {
+  document.getElementById('f_sel').innerHTML = dados.ferramentas.map((f, i) => '<option value="' + i + '">' + f.nome + ' (' + f.codigo + ')</option>').join('');
+  document.getElementById('f_colaborador').innerHTML = dados.colaboradores.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(c => '<option>' + c.nome + '</option>').join('');
+  document.getElementById('filtroFerrColab').innerHTML = '<option value="">Todos os colaboradores</option>' + dados.colaboradores.map(c => '<option>' + c.nome + '</option>').join('');
+}
+
+function salvarFerramenta() {
+  const nome = document.getElementById('f_nome').value.trim();
+  if (!nome) { toast('⚠️ Informe o nome da ferramenta'); return; }
+  dados.ferramentas.push({ nome: nome, codigo: document.getElementById('f_codigo').value.trim(), categoria: document.getElementById('f_categoria').value, colaborador: '', entrega: '', devolucao: '', obs: '' });
+  salvar();
+  document.getElementById('f_nome').value = '';
+  document.getElementById('f_codigo').value = '';
+  preencherSelectsFerramentas();
+  renderFerramentas();
+  toast('✅ Ferramenta cadastrada!');
+}
+
+function atribuirFerramenta() {
+  const idx = parseInt(document.getElementById('f_sel').value);
+  const colab = document.getElementById('f_colaborador').value;
+  const entrega = document.getElementById('f_entrega').value;
+  const devolucao = document.getElementById('f_devolucao').value;
+  const obs = document.getElementById('f_obs').value.trim();
+  if (!colab || !entrega) { toast('⚠️ Informe colaborador e data de entrega'); return; }
+  dados.ferramentas[idx].colaborador = colab;
+  dados.ferramentas[idx].entrega = entrega;
+  dados.ferramentas[idx].devolucao = devolucao;
+  dados.ferramentas[idx].obs = obs;
+  salvar();
+  ['f_entrega', 'f_devolucao', 'f_obs'].forEach(id => document.getElementById(id).value = '');
+  preencherSelectsFerramentas();
+  renderFerramentas();
+  toast('✅ Ferramenta atribuída!');
+}
+
+function devolverFerramenta(idx) {
+  if (confirm('Registrar devolução desta ferramenta?')) {
+    dados.ferramentas[idx].devolucao = hoje();
+    salvar(); renderFerramentas();
+    toast('✅ Devolução registrada!');
+  }
+}
+
+function renderFerramentas() {
+  const fC = document.getElementById('filtroFerrColab').value;
+  const fS = document.getElementById('filtroFerrStatus').value;
+  let lista = dados.ferramentas;
+  if (fC) lista = lista.filter(f => f.colaborador === fC);
+  if (fS === 'disponivel') lista = lista.filter(f => !f.colaborador);
+  if (fS === 'emuso') lista = lista.filter(f => f.colaborador && !f.devolucao);
+  let html = '<thead><tr><th>Ferramenta</th><th>Código</th><th>Categoria</th><th>Colaborador</th><th>Entrega</th><th>Devolução</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+  lista.forEach(f => {
+    const idx = dados.ferramentas.indexOf(f);
+    const emUso = f.colaborador && !f.devolucao;
+    const st = emUso ? '<span class="ferr-status emuso">Em uso</span>' : '<span class="ferr-status disponivel">Disponível</span>';
+    html += '<tr><td><b>' + f.nome + '</b></td><td>' + (f.codigo || '—') + '</td><td>' + f.categoria + '</td>' +
+      '<td>' + (f.colaborador || '—') + '</td><td>' + fmtData(f.entrega) + '</td><td>' + fmtData(f.devolucao) + '</td>' +
+      '<td>' + st + '</td>' +
+      '<td>' + (emUso ? '<button class="btn small green" onclick="devolverFerramenta(' + idx + ')">↩️ Devolver</button>' : '') + '</td></tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tabelaFerramentas').innerHTML = html;
+}
+
+// ===== INICIALIZAÇÃO =====
+document.getElementById('a_data').value = hoje();
+document.getElementById('p_inicio').value = hoje();
+adicionarColaboradorApontamento();
+preencherSelectEngenheiros();
+renderVisao();
+</script>
+</body>
+</html>
